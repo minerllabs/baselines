@@ -1,5 +1,6 @@
 from minerl import data
 from minerl import env
+from minerl.data import downloader
 
 
 def main():
