@@ -1,20 +1,23 @@
-from minerl import data
+from minerl.data import DataPipeline
 from minerl import env
-from minerl.data import downloader
+
+import os
 
 
 def main():
-    # d = data.init()
+    d = DataPipeline(os.path.join('C:', os.sep, 'data', 'data_texture_1_low_res'), 2, 32, 32)
     # e = env.init()
-    obs = env.reset()
+    # obs = env.reset()
 
-    while not data.finished():
-        human_obs, human_reward = data.sample()
+    for batch in d.batch_iter(64, 64):
+        print("Batch len:", len(batch))
+        return
 
-    actionSpace = env.getActionSpace()
+    # while not env.isFinished():
+    #     action = actionSpace.sample()
+    #     human_obs = data.get()
+    #     env_obs, reward = env.step(action)
 
-    while not env.isFinished():
-        action = actionSpace.sample()
-        human_obs = data.get()
-        env_obs, reward = env.step(action)
 
+if __name__ == '__main__':
+    main()
