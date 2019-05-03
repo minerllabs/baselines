@@ -1,23 +1,33 @@
-from minerl import data
-from minerl import env
+import minerl
+import gym
 
 import os
 
 
-def main():
-    d = data.init(os.path.join('C:', os.sep, 'data', 'data_texture_1_low_res'))
-    # e = env.init()
-    # obs = env.reset()
+def step_data():
+    d = minerl.data.init(os.path.join('C:', os.sep, 'data', 'data_texture_1_low_res'))
 
+    # Iterate through batches of data
     for batch in d.batch_iter(64, None):
         print("Batch len:", len(batch))
 
 
-    # while not env.isFinished():
-    #     action = actionSpace.sample()
-    #     human_obs = data.get()
-    #     env_obs, reward = env.step(action)
+def step_env():
+    # Run random agent through environemnt
+    env = gym.make('MineRLTreechop-v0')
+
+    for _ in range(NUM_EPISODES):
+        obs, info = env.reset()
+        done = False
+
+        while not done:
+            obs, reward, done, info = env.step(
+                env.action_space.sample())
+        print("MISSION DONE")
+
+    print("Demo Complete.")
 
 
 if __name__ == '__main__':
-    main()
+    step_data()
+    step_env()
