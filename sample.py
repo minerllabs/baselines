@@ -1,15 +1,27 @@
 import minerl
+import itertools
 import gym
-
 import os
+
+NUM_EPISODES = 42
 
 
 def step_data():
-    d = minerl.data.init(os.path.join('C:', os.sep, 'data', 'data_texture_1_low_res'))
+    d = minerl.data.init()
 
     # Iterate through batches of data
-    for batch in d.batch_iter(64, None):
+    for batch in itertools.islice(d.batch_iter(64, None), 2):
         print("Batch len:", len(batch))
+
+    # Iterate through batches of data
+    for batch in itertools.islice(d.batch_iter(64, None), 3):
+        print("Batch thing len:", len(batch))
+
+
+    # Iterate through batches of data
+    for batch in itertools.islice(d.batch_iter(64, None), 2):
+        print("Batch len:", len(batch))
+
 
 
 def step_env():
