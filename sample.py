@@ -18,7 +18,7 @@ def step_data():
 
 def step_env():
     # Run random agent through environemnt
-    env = gym.make('MineRLTreechop-v0')
+    env = gym.make('MineRLTreechop-v0') # or try 'MineRLNavigateDense-v0' 
 
     for _ in range(NUM_EPISODES):
         obs, info = env.reset()
@@ -33,7 +33,8 @@ def step_env():
 
 
 if __name__ == '__main__':
-    print("Testing data pipeline")
-    step_data()
+    # Data pipeline is not ready to be published
+    # print("Testing data pipeline")
+    # step_data()
     print("Testing environment")
     step_env()
