@@ -34,7 +34,7 @@ def step_env():
 
 if __name__ == '__main__':
     # Data pipeline is not ready to be published
-    # print("Testing data pipeline")
-    # step_data()
-    print("Testing environment")
-    step_env()
+    print("Testing data pipeline")
+    step_data()
+    # print("Testing environment")
+    # step_env()
