@@ -11,13 +11,15 @@ def step_data():
     d = minerl.data.init()
 
     # Iterate through batches of data
-    for obs, info in itertools.islice(d.batch_iter(64, None), 6):
+    for act, obs, rew, info in itertools.islice(d.batch_iter(64, None), 6):
+        print("Act shape:", np.shape(act))
         print("Obs shape:", np.shape(obs))
+        print("Rew shape:", np.shape(rew))
         print("Info shape:", np.shape(info))
 
 
 def step_env():
-    # Run random agent through environemnt
+    # Run random agent through environment
     env = gym.make('MineRLTreechop-v0') # or try 'MineRLNavigateDense-v0' 
 
     for _ in range(NUM_EPISODES):
