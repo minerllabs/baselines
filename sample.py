@@ -8,14 +8,16 @@ NUM_EPISODES = 42
 
 
 def step_data():
-    d = minerl.data.init()
+    d = minerl.data.make('MineRLNavigate-v0')
 
     # Iterate through batches of data
-    for act, obs, rew, info in itertools.islice(d.batch_iter(64, None), 6):
-        print("Act shape:", np.shape(act))
-        print("Obs shape:", np.shape(obs))
-        print("Rew shape:", np.shape(rew))
-        print("Info shape:", np.shape(info))
+    counter = 0
+    for act, obs, rew in itertools.islice(d.batch_iter(3, None), 600):
+        print("Act shape:", len(act), act)
+        print("Obs shape:", len(obs), obs)
+        print("Rew shape:", len(rew), rew)
+        print(counter + 1)
+        counter += 1
 
 
 def step_env():
