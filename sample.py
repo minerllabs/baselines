@@ -1,14 +1,14 @@
 import minerl
 import itertools
 import gym
-import os
+import sys
 import numpy as np
 
 NUM_EPISODES = 42
 
 
-def step_data():
-    d = minerl.data.make('MineRLNavigate-v0')
+def step_data(environment='MineRLTreechop-v0'):
+    d = minerl.data.make(environment)
 
     # Iterate through batches of data
     counter = 0
@@ -20,9 +20,9 @@ def step_data():
         counter += 1
 
 
-def step_env():
+def step_env(environment='MineRLTreechop-v0'):
     # Run random agent through environment
-    env = gym.make('MineRLTreechop-v0') # or try 'MineRLNavigateDense-v0' 
+    env = gym.make(environment) # or try 'MineRLNavigateDense-v0'
 
     for _ in range(NUM_EPISODES):
         obs, info = env.reset()
@@ -31,14 +31,27 @@ def step_env():
         while not done:
             obs, reward, done, info = env.step(
                 env.action_space.sample())
+            print (reward)
         print("MISSION DONE")
 
     print("Demo Complete.")
 
 
 if __name__ == '__main__':
-    # Data pipeline is not ready to be published
-    print("Testing data pipeline")
-    step_data()
-    # print("Testing environment")
-    # step_env()
+    if len(sys.argv) > 0 and sys.argv[1] == 'data':
+            print("Testing data pipeline")
+            if len(sys.argv) > 2 and not sys.argv[2] is None:
+                step_data(sys.argv[2])
+            else:
+                step_data()
+    elif len(sys.argv) > 0 and sys.argv[1] == 'env':
+            print("Testing environment")
+            if len(sys.argv) > 2 and not sys.argv[2] is None:
+                step_env(sys.argv[2])
+            else:
+                step_env()
+    else:
+        print("Testing data pipeline")
+        step_data()
+        print("Testing environment")
+        step_env()
