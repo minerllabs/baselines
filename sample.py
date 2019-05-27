@@ -31,9 +31,9 @@ def step_env(environment='MineRLObtainIronPickaxe-v0'):
         while not done:
             # This default action has only been added for MineRLObtainIronPickaxe-v0 so far
             action = env.default_action
-            action['craft'] = 'planks'
-            action['nearbyCraft'] = 'iron_pickaxe'
-            action['nearbySmelt'] = 'iron_ingot'
+            action['craft'] = env.action_space.spaces['craft'].sample()
+            action['nearbyCraft'] = env.action_space.spaces['nearbyCraft'].sample()
+            action['nearbySmelt'] = env.action_space.spaces['nearbySmelt'].sample()
             obs, reward, done, info = env.step(action)
             print(reward)
         print("MISSION DONE")
