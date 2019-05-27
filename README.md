@@ -1,4 +1,4 @@
-# MineRL Diamond Challenge
+# MineRL Competition
 **`Sample Efficient Reinforcement Learning Through Human Demonstrations`**
 
 This quick-start kit provides all of the resources needed to be successful in the MineRL Diamond Challenge. 
@@ -10,7 +10,7 @@ This quick-start kit provides all of the resources needed to be successful in th
 
 
 ## Environment
-The MineRL Diamond Challenge uses a custom distribution of Microsoft's Malmo Env. This environment as well as a random gym-style agent can be found in ```MINERL_HOME/minerl_env``` 
+The MineRL Competiton uses a custom distribution of Microsoft's Malmo Env. This environment is packaged in the minerl package available via PyPI.
 
 ## Data
 The MineRL Diamond Challenge leverages a large-scale dataset of human demonstrations - MineRLv0. To ensure access during evaluation, a python api is provided to load, filter, and map these demonstrations.
