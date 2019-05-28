@@ -20,7 +20,7 @@ def step_data(environment='MineRLTreechop-v0'):
         counter += 1
 
 
-def step_env(environment='MineRLObtainIronPickaxe-v0'):
+def step_env(environment='MineRLObtainTest-v0'):
     # Run random agent through environment
     env = gym.make(environment) # or try 'MineRLNavigateDense-v0'
 
@@ -31,6 +31,7 @@ def step_env(environment='MineRLObtainIronPickaxe-v0'):
         while not done:
             # This default action has only been added for MineRLObtainIronPickaxe-v0 so far
             action = env.default_action
+            action['attack'] = 1
             action['place'] = env.action_space.spaces['place'].sample()
             action['craft'] = env.action_space.spaces['craft'].sample()
             action['nearbyCraft'] = env.action_space.spaces['nearbyCraft'].sample()
