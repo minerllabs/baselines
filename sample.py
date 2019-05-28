@@ -78,8 +78,8 @@ def gen_obtain_debug_actions(env):
     act(camera=np.array([0.0, -90.0], dtype=np.float32))
 
     act(craft='planks')
-    act(craft='stick') 
-    act(craft='stick')  
+    act(craft='stick')
+    act(craft='stick')
     act(nearbyCraft='iron_pickaxe')
 
     return actions
@@ -121,7 +121,7 @@ def step_env(environment='MineRLObtainIronPickaxe-v0'):
             obs, reward, done, info = env.step(action)
             if reward != 0:
                 print(reward)
-        print("MISSION DONE") 
+        print("MISSION DONE")
 
     print("Demo Complete.")
 
