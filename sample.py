@@ -40,7 +40,7 @@ def gen_obtain_debug_actions(env):
     # act(nearbyCraft='stone_pickaxe')  # Should fail - no crafting table in view
     act(camera=np.array([0.0, 90.0], dtype=np.float32))
     act(place='crafting_table')
-    act(nearbyCraft='stone_pickaxe')  # Currently broken
+    act(nearbyCraft='stone_pickaxe')
     act(camera=np.array([0.0, 90.0], dtype=np.float32))
     act(place='furnace')
     act(nearbySmelt='iron_ingot')
@@ -50,11 +50,12 @@ def gen_obtain_debug_actions(env):
     act(camera=np.array([45.0, 0.0], dtype=np.float32))
 
     # Make pile to mine through (attack ground first to clear grass)
-    act(attack=True)
-    for _ in range(20):
-        act(jump=1, place='cobblestone')
+    act(attack=1)
+    # for _ in range(20):
+    #     act(jump=1, place='cobblestone')
+    act(equip='stone_pickaxe')
     for _ in range(40):
-        act(attack=True)
+        act(attack=1)
 
     return actions
 
