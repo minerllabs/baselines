@@ -35,8 +35,8 @@ def gen_obtain_debug_actions(env):
 
     # Testing craft handlers
     act(place='log')
-    [act(attack=1) for _ in range(20)]
     act(craft='stick')
+    act(craft='stick')  # Should fail - no more planks remaining
     act(craft='planks')
     act(craft='crafting_table')
 
@@ -63,6 +63,16 @@ def gen_obtain_debug_actions(env):
     [(act(jump=1), act(jump=1), act(jump=1), act(jump=1), act(jump=1), act(place='cobblestone'), act()) for _ in range(2)]
     act(equip='stone_pickaxe')
     [act(attack=1) for _ in range(40)]
+
+    act(camera=np.array([-45.0, -90.0], dtype=np.float32))
+    act(nearbyCraft='stone_axe')
+    act(equip='stone_axe')
+
+    # Test log reward
+    act(camera=np.array([0.0, -90.0], dtype=np.float32))
+    [act(attack=1) for _ in range(40)]
+    [act(forward=1) for _ in range(10)]
+
 
     return actions
 
