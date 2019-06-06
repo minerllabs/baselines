@@ -74,6 +74,14 @@ def gen_obtain_debug_actions(env):
     [act(forward=1) for _ in range(10)]
 
 
+    act(camera=np.array([0.0, -90.0], dtype=np.float32))
+    act(camera=np.array([0.0, -90.0], dtype=np.float32))
+
+    act(craft='planks')
+    act(craft='stick') 
+    act(craft='stick')  
+    act(nearbyCraft='iron_pickaxe')
+
     return actions
 
 
