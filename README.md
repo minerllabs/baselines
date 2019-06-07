@@ -16,7 +16,7 @@ The MineRL Competiton uses a custom distribution of Microsoft's Malmo Env. This 
 `pip3 install minerl --user`
 
 ### Useage
-`minerl` uses OpenAI gym wrapers providing the following environments:
+`minerl` uses OpenAI gym wrapers providing the following environments with accompanying data:
 * `MineRLTreechop-v0`
 * `MineRLNavigate-v0`
 * `MineRLNavigateDense-v0`
@@ -25,6 +25,9 @@ The MineRL Competiton uses a custom distribution of Microsoft's Malmo Env. This 
 * `MineRLObtainIronPickaxe-v0`
 * `MineRLObtainDiamond-v0`
 
+`minerl` also currently includes a few debug environments for testing that lack any data:
+* `MineRLNavigateDenseFixed-v0`
+* `MineRLObtainTest-v0`
 
 ## Data
 The MineRL Competition leverages a large-scale dataset of human demonstrations - MineRLv0. To ensure access during evaluation, a python api is provided to load, filter, and map these demonstrations.
