@@ -6,7 +6,7 @@ This quick-start kit provides all of the resources needed to be successful in th
 
 * **Submission, competition updates, and leaderboards** are available via the competition homepage: `https://www.aicrowd.com/challenges/neurips-2019-minerl-competition`
 * **Questions** about getting started or rules of the competition should be directed to the competition forum: `https://discourse.aicrowd.com/c/neurips-2019-minerl-competition`  
-* **Technical issues** related to this quick-start kit or python package should be submitted through the GitHub pages: `https://github.com/minenetproject/quick_start/issues` and `https://github.com/minenetproject/minerl/issues` respectively
+* **Technical issues** related to this quick-start kit or python package should be submitted through the GitHub pages: `https://github.com/minerllabs/quick_start/issues` and `https://github.com/minerllabs/minerl/issues` respectively
 
 
 ## Environment
