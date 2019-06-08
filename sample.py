@@ -13,7 +13,7 @@ def download_data():
     if input("(y)es to confirm: ").lower() in ['yes', 'y', 'yeah', 'sure', 'please']:
         minerl.data.download(directory=directory)
 
-def step_data(environment='MineRLTreechop-v0'):
+def step_data(environment='MineRLObtainDiamondDense-v0'):
     d = minerl.data.make(environment)
 
     # Iterate through batches of data
@@ -103,7 +103,6 @@ def test_env(environment='MineRLObtainTest-v0'):
         if reward != 0:
             print(reward)
     print("MISSION DONE")
-
 
 
 def step_env(environment='MineRLObtainIronPickaxe-v0'):
