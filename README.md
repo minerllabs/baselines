@@ -3,6 +3,7 @@
 
 This quick-start kit provides all of the resources needed to be successful in the MineRL Diamond Challenge. 
 
+** [Full documentation for the environments and dataset is found here!](http://minerl.io/docs/)
 
 * **Submission, competition updates, and leaderboards** are available via the [competition homepage](https://www.aicrowd.com/challenges/neurips-2019-minerl-competition) 
   > note that submissions and leaderboards are availabe yet
@@ -14,7 +15,7 @@ This quick-start kit provides all of the resources needed to be successful in th
 The MineRL Competiton uses a custom distribution of Microsoft's Malmo Env. This environment is packaged in the `minerl` package available via PyPI. Documentation is found [here](http://minerl.io/docs/)
 
 ### Installation
-Ensure java-8 is installed and then simply
+Ensure JDK-8 is installed and then simply (python3.5+)
 `pip3 install minerl --user`
 
 ### Environments
