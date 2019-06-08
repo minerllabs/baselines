@@ -4,9 +4,10 @@
 This quick-start kit provides all of the resources needed to be successful in the MineRL Diamond Challenge. 
 
 
-* **Submission, competition updates, and leaderboards** are available via the competition homepage: `https://www.aicrowd.com/challenges/neurips-2019-minerl-competition` note - submissions are not yet open
-* **Questions** about getting started or rules of the competition should be directed to the competition forum: `https://discourse.aicrowd.com/c/neurips-2019-minerl-competition`  
-* **Technical issues** related to this quick-start kit or python package should be submitted through the GitHub pages: `https://github.com/minerllabs/quick_start/issues` and `https://github.com/minerllabs/minerl/issues` respectively
+* **Submission, competition updates, and leaderboards** are available via the [competition homepage](https://www.aicrowd.com/challenges/neurips-2019-minerl-competition) 
+  > note that submissions and leaderboards are availabe yet
+* **Questions** about getting started or rules of the competition should be directed to the [competition forum](https://discourse.aicrowd.com/c/neurips-2019-minerl-competition) or [discord server](https://discordapp.com/api/guilds/565639094860775436/widget.json)
+* **Technical issues** related to the code should be submitted through the [MineRL GitHub page](https://github.com/minerllabs/minerl/issues) This repo may not be monitored!
 
 
 ## Environment
@@ -26,6 +27,7 @@ Ensure java-8 is installed and then simply
 * `MineRLObtainIronPickaxe-v0`
 * `MineRLObtainIronPickaxeDense-v0`
 * **`MineRLObtainDiamond-v0`**
+| All agents will be evaluated on this environment
 * `MineRLObtainDiamondDense-v0`
 
 `minerl` also currently includes a few debug environments for testing that lack any data:
