@@ -8,19 +8,21 @@ import numpy as np
 
 NUM_EPISODES = 4
 
+def download_data():
+    directory = input("Where would you like to download MineRL-v0?\n")
+    if input("(y)es to confirm: ").lower() in ['yes', 'y', 'yeah', 'sure', 'please']:
+        minerl.data.download(directory=directory)
 
 def step_data(environment='MineRLTreechop-v0'):
     d = minerl.data.make(environment)
 
     # Iterate through batches of data
-    counter = 0
-    for act, obs, rew in itertools.islice(d.batch_iter(3, None), 600):
-        print("Act shape:", len(act), act)
-        print("Obs shape:", len(obs), obs)
+    for obs, rew, done, act in itertools.islice(d.seq_iter(1, 32), 600):
+        print("Act shape:", len(act), act.items())
+        print("Obs shape:", len(obs), obs.items())
         print("Rew shape:", len(rew), rew)
-        print(counter + 1)
-        counter += 1
-
+        print("Done shape:", len(done), done)
+        time.sleep(0.1)
 
 def gen_obtain_debug_actions(env):
     actions = []
@@ -141,6 +143,8 @@ if __name__ == '__main__':
                 step_env()
     elif len(sys.argv) > 0 and sys.argv[1] == 'test':
         test_env()
+    elif len(sys.argv) > 0 and sys.argv[1] == 'download':
+        download_data()
     else:
         print("Testing data pipeline")
         step_data()
