@@ -6,7 +6,7 @@ This quick-start kit provides all of the resources needed to be successful in th
 
 * **Submission, competition updates, and leaderboards** are available via the [competition homepage](https://www.aicrowd.com/challenges/neurips-2019-minerl-competition) 
   > note that submissions and leaderboards are availabe yet
-* **Questions** about getting started or rules of the competition should be directed to the [competition forum](https://discourse.aicrowd.com/c/neurips-2019-minerl-competition) or [discord server](https://discordapp.com/api/guilds/565639094860775436/widget.json)
+* **Questions** about getting started or rules of the competition should be directed to the [competition forum](https://discourse.aicrowd.com/c/neurips-2019-minerl-competition) or [discord server](https://discord.gg/BT9uegr)
 * **Technical issues** related to the code should be submitted through the [MineRL GitHub page](https://github.com/minerllabs/minerl/issues) This repo may not be monitored!
 
 
