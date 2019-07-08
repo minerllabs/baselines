@@ -1,4 +1,3 @@
-dummy line
 # MineRL Competition's baseline implementation with ChainerRL
 
 Starter kit for [MineRL](https://github.com/minerllabs/minerl)
@@ -42,7 +41,7 @@ For the exact hyper parameters we used, see each script on "Getting started" sec
 
 ## MineRLTreechop-v0
 
-![release20190708_MineRLTreechop-v0](static/release20190708_MineRLTreechop-v0.png)
+![release20190708_MineRLTreechop-v0](static/release20190708/MineRLTreechop-v0.png)
 
 Figure above shows the training phase scores on `MineRLTreecho-v0` task.
 Each algorithm is independently trained for 3 times (trials), and the error area corresponds to the standard deviation (not the standard error) over 3 trials score.
@@ -54,22 +53,55 @@ Rainbow and PPO achieves better results than DDDQN.
 
 Note: for fair comparison, the x-axis does not represent "timestep", but "episode". (because Rainbow and PPO use "frameskip" strategy while DDDQN follows the original paper's settings (no frameskipping)).
 
+Last evaluation episodes' mp4:
+- [Rainbow trial 1](static/release20190708/RainbowTreechop1.mp4)
+- [Rainbow trial 2](static/release20190708/RainbowTreechop2.mp4)
+- [Rainbow trial 3](static/release20190708/RainbowTreechop3.mp4)
+- [PPO trial 1](static/release20190708/PPOTreechop1.mp4)
+- [PPO trial 2](static/release20190708/PPOTreechop2.mp4)
+- [PPO trial 3](static/release20190708/PPOTreechop3.mp4)
+- (NA) DDDQN trial 1
+- [DDDQN trial 2](static/release20190708/DDDQNTreechop2.mp4)
+- [DDDQN trial 3](static/release20190708/DDDQNTreechop3.mp4)
+
 
 ## MineRLNavigateDense-v0
 
-![release20190708_MineRLNavigateDense-v0](static/release20190708_MineRLNavigateDense-v0.png)
+![release20190708_MineRLNavigateDense-v0](static/release20190708/MineRLNavigateDense-v0.png)
 
 For `MineRLNavigateDense`, DDDQN achieves comparable score with Rainbow/PPO.
 
 [The MineRL competition's original paper](https://arxiv.org/abs/1904.10079) reports the score of DDDQN (refered as "DQN" in the paper) as 55.59 +- 11.38, which is consistent with our result. (Our result is slightly worse than the original though)
 
+Last evaluation episodes' mp4:
+- [Rainbow trial 1](static/release20190708/RainbowNavigateDense1.mp4)
+- [Rainbow trial 2](static/release20190708/RainbowNavigateDense2.mp4)
+- [Rainbow trial 3](static/release20190708/RainbowNavigateDense3.mp4)
+- [PPO trial 1](static/release20190708/PPONavigateDense1.mp4)
+- [PPO trial 2](static/release20190708/PPONavigateDense2.mp4)
+- [PPO trial 3](static/release20190708/PPONavigateDense3.mp4)
+- [DDDQN trial 1](static/release20190708/DDDQNNavigateDense1.mp4)
+- [DDDQN trial 2](static/release20190708/DDDQNNavigateDense2.mp4)
+- [DDDQN trial 3](static/release20190708/DDDQNNavigateDense3.mp4)
+
 
 ## MineRLNavigate-v0
 
-![release20190708_MineRLNavigate-v0](static/release20190708_MineRLNavigate-v0.png)
+![release20190708_MineRLNavigate-v0](static/release20190708/MineRLNavigate-v0.png)
 
 No algorithm could solve the `MineRLNavigate-v0` (sparse reaward task).
 In order to solve sparse environments, one needs to hack ordinal RL algorithms with reaward shaping or smart exploration (namely, transfer learning from dense tasks or utilize expert trajectories) etc.
+
+Last evaluation episodes' mp4:
+- [Rainbow trial 1](static/release20190708/RainbowNavigate1.mp4)
+- [Rainbow trial 2](static/release20190708/RainbowNavigate2.mp4)
+- [Rainbow trial 3](static/release20190708/RainbowNavigate3.mp4)
+- (NA) PPO trial 1
+- [PPO trial 2](static/release20190708/PPONavigate2.mp4)
+- [PPO trial 3](static/release20190708/PPONavigate3.mp4)
+- [DDDQN trial 1](static/release20190708/DDDQNNavigate1.mp4)
+- (NA) DDDQN trial 2
+- [DDDQN trial 3](static/release20190708/DDDQNNavigate3.mp4)
 
 
 ## MineRLObtainDiamond-v0
