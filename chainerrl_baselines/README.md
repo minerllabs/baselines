@@ -8,6 +8,7 @@ Competition with [ChainerRL](https://github.com/chainer/chainerrl).
 - [MineRL](https://github.com/minerllabs/minerl)
   - [Competition page](https://www.aicrowd.com/challenges/neurips-2019-minerl-competition)
   - [docs](http://minerl.io/docs/)
+  - [competition proposal paper](https://arxiv.org/abs/1904.10079)
 - [ChainerRL](https://github.com/chainer/chainerrl)
 - [Chainer](https://chainer.org/)
 
@@ -15,7 +16,7 @@ Competition with [ChainerRL](https://github.com/chainer/chainerrl).
 
 ```sh
 git clone <URL-for-this-repo>  # FIXME
-cd minerl-chainerrl
+cd quickstart/chainerrl_baselines
 pip install -r requirements.txt
 ```
 
@@ -24,37 +25,56 @@ See [MineRL installation](https://github.com/minerllabs/minerl#installation) and
 
 # Getting started
 
-- [baselines/path-to-double-dueling-dqn-script.sh]  # FIXME
-    - Double Dueling DQN (DDDQN)
-- [baselines/path-to-rainbow-script.sh]  # FIXME
-    - Rainbow 
-- [baselines/path-to-ppo-script.sh]  # FIXME
+- [baselines/dddqn.sh]
+    - Double Dueling DQN (DDDQN), which mirrors the original implementation and hyperparameters described in [competition proposal paper](https://arxiv.org/abs/1904.10079) (code: [here](https://github.com/minerllabs/minerl/blob/master/tests/excluded/navigate_dqn_test.py) and [here](https://github.com/minerllabs/minerl/blob/master/tests/excluded/treechop_dqn_test.py)).
+- [baselines/rainbow.sh]
+    - Rainbow
+- [baselines/ppo.sh]
     - PPO
 
 # Experimental results of DDDQN/Rainbow/PPO
 
 Charts below show the *training* reward curves for each algorithm with prior knowledge of action/observation space.
 
-Hyper parameters were chosen with grid search.
+For the exact hyper parameters we used, see each script on "Getting started" section and the corresponding Python script
+(`baselines/dqn_family.py`, `baselines/ppo.py`).
 
 ## MineRLTreechop-v0
 
-Figure will be here
+![release20190708_MineRLTreechop-v0](static/release20190708_MineRLTreechop-v0.png)
+
+Figure above shows the training phase scores on `MineRLTreecho-v0` task.
+Each algorithm is independently trained for 3 times (trials), and the error area corresponds to the standard deviation (not the standard error) over 3 trials score.
+The chart is also averaged over 30 episodes for visibility.
+
+Rainbow and PPO achieves better results than DDDQN.  
+
+[The MineRL competition's original paper](https://arxiv.org/abs/1904.10079) reports the score of DDDQN (refered as "DQN" in the paper) as 3.73 +- 0.61, which is consistent with our result. (Our result is slightly better than the original though)
+
+Note: for fair comparison, the x-axis does not represent "timestep", but "episode". (because Rainbow and PPO use "frameskip" strategy while DDDQN follows the original paper's settings (no frameskipping)).
 
 
 ## MineRLNavigateDense-v0
 
-Figure will be here
+![release20190708_MineRLNavigateDense-v0](static/release20190708_MineRLNavigateDense-v0.png)
+
+For `MineRLNavigateDense`, DDDQN achieves comparable score with Rainbow/PPO.
+
+[The MineRL competition's original paper](https://arxiv.org/abs/1904.10079) reports the score of DDDQN (refered as "DQN" in the paper) as 55.59 +- 11.38, which is consistent with our result. (Our result is slightly worse than the original though)
 
 
 ## MineRLNavigate-v0
 
-Figure will be here
+![release20190708_MineRLNavigate-v0](static/release20190708_MineRLNavigate-v0.png)
+
+No algorithm could solve the `MineRLNavigate-v0` (sparse reaward task).
+In order to solve sparse environments, one needs to hack ordinal RL algorithms with reaward shaping or smart exploration (namely, transfer learning from dense tasks or utilize expert trajectories) etc.
 
 
 ## MineRLObtainDiamond-v0
 
-Figure will be here
+`MineRLObtainDiamond-v0` is the ultimate goal for this competition, but the baselines described bolew never solved this.
+The action space shaping strategy we tried for this task is described in "Exclusive actions" sections.
 
 
 ## Prior knowledge for action/observation spaces
