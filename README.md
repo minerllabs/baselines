@@ -3,23 +3,23 @@
 
 This quick-start kit provides all of the resources needed to be successful in the MineRL Diamond Challenge. 
 
-** [Full documentation for the environments and dataset is found here!](http://minerl.io/docs/)
+** [The full documentation for the dataset and the environments is found here!](http://minerl.io/docs/)
 
 * **Submission, competition updates, and leaderboards** are available via the [competition homepage](https://www.aicrowd.com/challenges/neurips-2019-minerl-competition) 
-  > note that submissions and leaderboards are availabe yet
+  > note that submissions and leaderboards are not availabe yet
 * **Questions** about getting started or rules of the competition should be directed to the [competition forum](https://discourse.aicrowd.com/c/neurips-2019-minerl-competition) or [discord server](https://discord.gg/BT9uegr)
 * **Technical issues** related to the code should be submitted through the [MineRL GitHub page](https://github.com/minerllabs/minerl/issues) This repo may not be monitored!
 
 
 ## Environment
-The MineRL Competiton uses a custom distribution of Microsoft's Malmo Env. This environment is packaged in the `minerl` package available via PyPI. Documentation is found [here](http://minerl.io/docs/)
+The MineRL Competiton uses a custom distribution of Microsoft's Malmo Env. This environment is packaged in the `minerl` package available via PyPI. The documentation can be found [here](http://minerl.io/docs/)
 
 ### Installation
 Ensure JDK-8 is installed and then simply (python3.5+)
 `pip3 install minerl --user`
 
 ### Environments
-`minerl` uses OpenAI gym wrapers providing the following environments with accompanying data:
+`minerl` uses OpenAI gym wrappers for the following environments with accompanying data:
 * `MineRLTreechop-v0`
 * `MineRLNavigate-v0`
 * `MineRLNavigateDense-v0`
