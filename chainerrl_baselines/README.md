@@ -1,3 +1,4 @@
+dummy line
 # MineRL Competition's baseline implementation with ChainerRL
 
 Starter kit for [MineRL](https://github.com/minerllabs/minerl)
