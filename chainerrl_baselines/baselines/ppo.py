@@ -1,4 +1,4 @@
-"""original source: https://github.com/chainer/chainerrl/blob/master/examples/ale/train_ppo_ale.py
+"""original source: https://github.com/chainer/chainerrl/blob/master/examples/atari/train_ppo_ale.py
 
 MIT License
 

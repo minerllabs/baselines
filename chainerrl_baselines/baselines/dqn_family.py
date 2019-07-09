@@ -1,4 +1,4 @@
-"""original source: https://github.com/chainer/chainerrl/blob/master/examples/atari/dqn/train_dqn.py
+"""original source: https://github.com/chainer/chainerrl/blob/master/examples/atari/reproduction/rainbow/train_rainbow.py
 
 MIT License
 
