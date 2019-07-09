@@ -13,8 +13,8 @@ This repository contains a set of baselines implementations to help you get star
 # Installation
 
 ```sh
-git clone <URL-for-this-repo>  # FIXME
-cd quickstart/chainerrl_baselines
+git clone git@github.com:minerllabs/quick_start.git
+cd quick_start/chainerrl_baselines
 pip install -r requirements.txt
 ```
 
@@ -31,6 +31,25 @@ See [MineRL installation](https://github.com/minerllabs/minerl#installation) and
     - PPO
 
 # Experimental results of DDDQN/Rainbow/PPO
+
+|                    | Treechop           | Navigate         | NavigateDense      |
+| :---               | ---:               | ---:             | ---:               |
+| (paper) DDDQN      | 3.73 +- 0.61       | 0.00 +- 0.00     | 55.59 +- 11.38     |
+| (paper) A2C        | 2.61 +- 0.50       | 0.00 +- 0.00     | -0.97 +- 3.32      |
+| (paper) BC         | 0.75 +- 0.39       | 4.23 +- 4.15     | 5.57 +- 6.00       |
+| (paper) PreDQN     | 4.16 +- 0.82       | 6.00 +- 4.65     | **94.96 +- 13.42** |
+| (**ours**) DDDQN   | 9.68 +- 5.28       | 5.00 +- 21.79    | 57.84 +- 50.74     |
+| (**ours**) Rainbow | **60.39 +- 19.88** | 9.00 +- 28.62    | 66.48 +- 38.73     |
+| (**ours**) PPO     | 38.44 +- 19.04     | 6.00 +- 23.75    | 80.84 +- 51.29     |
+| (paper) Human      | 64.00 +- 0.00      | 100.00 +- 0.00   | 164.00 +- 0.00     |
+| (paper) Random     | 3.81 +- 0.57       | 1.00 +- 1.95     | -4.37 +- 5.10      |
+
+Talbe 1: (for "paper") Results over the best 100 contiguous episodes. +- denotes standard deviation.  
+(for "ours") Results over the best 100 contiguous episodes among three trials. +- denotes standard deviation.  
+We do not emphasize the best performance for Navigate since the standard deviation is very large.  
+See Table 1 of [proposal paper](https://arxiv.org/abs/1904.10079) for more information.  
+Note that our current implementation does not use trajectory data.
+
 
 The figures below show the *training* reward graphs for each algorithm with task-specific prior knowledge used to shape the action and observation space.  
 For experitments, we used **MineRL v0.1.18** which is the latest as of July 9, 2019.  
@@ -172,9 +191,13 @@ These actions are removed from the agent's action choice.
 Actions specified as `--exclude-keys` are simply disabled and they will be never triggered.
 
 For example, 
-On `MineRLTreechop-v0`, `--always-keys` is `attack` and `--exclude-keys` are `back`, `left`, `right`, `sneak`, `sprint`.  
-On `MineRLNavigate-v0` / `MineRLNavigateDense-v0`, `--always-keys` are `forward`, `sprint`, `attack`
-and `--exclude-keys` are `back`, `left`, `right`, `sneak` and `place`.
+On `MineRLTreechop-v0`,
+  - `--always-keys`: `attack`
+  - `--exclude-keys`: `back`, `left`, `right`, `sneak`, `sprint`
+
+On `MineRLNavigate-v0` / `MineRLNavigateDense-v0`
+  - `--always-keys`: `forward`, `sprint`, `attack`
+  - `--exclude-keys`: `back`, `left`, `right`, `sneak`, `place`
 
 ### Serializing
 
@@ -211,6 +234,17 @@ See `env_wrappers.CombineActionWrapper` for more detail.
 
 Resulting action spaces after shaped with prior knowledge are:
 
-- Treechop: Discrete(5)
-- Navigate/NavigateDense: Discrete(6)
-- Obtain*: Discrete(36)
+- Treechop: `Discrete(5)`
+  1. (noop) `{'forward': 1, 'jump': 0, 'camera': [0, 0]}`
+  2. `{'forward': 0, 'jump': 0, 'camera': [0, 0]}`
+  3. `{'forward': 1, 'jump': 1, 'camera': [0, 0]}`
+  4. `{'forward': 1, 'jump': 0, 'camera': [0, -10]}`
+  5. `{'forward': 1, 'jump': 0, 'camera': [0, 10]}`  
+  Note that `attack` is always `1` and `back`, `left`, `right`, `sneak`, `sprint` are always `0`.
+- Navigate/NavigateDense: `Discrete(4)`
+  1. (noop) `{'jump': 0, 'camera': [0, 0]}`
+  2. `{'jump': 1, 'camera': [0, 0]}`
+  3. `{'jump': 0, 'camera': [0, -10]}`
+  4. `{'jump': 0, 'camera': [0, 10]}`  
+  Note that `forward`, `sprint`, `attack` are always `1` and `back`, `left`, `right`, `sneak`, `place` are always `0`.
+- Obtain*: `Discrete(36)`
