@@ -6,7 +6,7 @@ This repository contains a set of baselines implementations to help you get star
 - [MineRL](https://github.com/minerllabs/minerl)
   - [Competition page](https://www.aicrowd.com/challenges/neurips-2019-minerl-competition)
   - [Documentation](http://minerl.io/docs/)
-  - [Competition Introductory Paper](https://arxiv.org/abs/1904.10079)
+  - [Competition Proposal Paper](https://arxiv.org/abs/1904.10079)
 - [ChainerRL](https://github.com/chainer/chainerrl)
 - [Chainer](https://chainer.org/)
 
@@ -24,7 +24,7 @@ See [MineRL installation](https://github.com/minerllabs/minerl#installation) and
 # Getting started
 
 - [baselines/dddqn.sh]
-    - Double Dueling DQN (DDDQN), with implementation and hyperparameters as described in the [Introductory paper](https://arxiv.org/abs/1904.10079) (code: [here](https://github.com/minerllabs/minerl/blob/master/tests/excluded/navigate_dqn_test.py) and [here](https://github.com/minerllabs/minerl/blob/master/tests/excluded/treechop_dqn_test.py)).
+    - Double Dueling DQN (DDDQN), with implementation and hyperparameters as described in the [proposal paper](https://arxiv.org/abs/1904.10079) (code: [here](https://github.com/minerllabs/minerl/blob/master/tests/excluded/navigate_dqn_test.py) and [here](https://github.com/minerllabs/minerl/blob/master/tests/excluded/treechop_dqn_test.py)).
 - [baselines/rainbow.sh]
     - Rainbow
 - [baselines/ppo.sh]
@@ -32,7 +32,8 @@ See [MineRL installation](https://github.com/minerllabs/minerl#installation) and
 
 # Experimental results of DDDQN/Rainbow/PPO
 
-The figures below show the *training* reward graphs for each algorithm with task-specific prior knowledge used to shape the action and observation space.
+The figures below show the *training* reward graphs for each algorithm with task-specific prior knowledge used to shape the action and observation space.  
+For experitments, we used **MineRL v0.1.18** which is the latest as of July 9, 2019.  
 
 The exact hyperparameters used for each algorithm can be found from the links in the "Getting Started" section and their corresponding Python scripts (`baselines/dqn_family.py`, `baselines/ppo.py`).
 
@@ -52,15 +53,24 @@ Rainbow and PPO outperform DDDQN.
 Note: for a fair comparison, the x-axis does not represent "timestep", but "episode". (because Rainbow and PPO use "frameskip" strategy while DDDQN follows the paper's settings (no frame skipping)).
 
 Videos of trained agents during their last evaluation round:
-- [Rainbow trial 1](static/release20190708/RainbowTreechop1.mp4)
-- [Rainbow trial 2](static/release20190708/RainbowTreechop2.mp4)
-- [Rainbow trial 3](static/release20190708/RainbowTreechop3.mp4)
-- [PPO trial 1](static/release20190708/PPOTreechop1.mp4)
-- [PPO trial 2](static/release20190708/PPOTreechop2.mp4)
-- [PPO trial 3](static/release20190708/PPOTreechop3.mp4)
+- [Rainbow trial 1 (reward 58.0)](static/release20190708/RainbowTreechop1.mp4)
+- [Rainbow trial 2 (reward 79.0)](static/release20190708/RainbowTreechop2.mp4)
+- [Rainbow trial 3 (reward 41.0)](static/release20190708/RainbowTreechop3.mp4)
+- [PPO trial 1 (reward 68.0)](static/release20190708/PPOTreechop1.mp4)
+- [PPO trial 2 (reward 26.0) ](static/release20190708/PPOTreechop2.mp4)
+- [PPO trial 3 (reward 54.0)](static/release20190708/PPOTreechop3.mp4)
 - (NA) DDDQN trial 1
-- [DDDQN trial 2](static/release20190708/DDDQNTreechop2.mp4)
-- [DDDQN trial 3](static/release20190708/DDDQNTreechop3.mp4)
+- [DDDQN trial 2 (reward 0.0?)](static/release20190708/DDDQNTreechop2.mp4)
+- [DDDQN trial 3 (reward 1.0)](static/release20190708/DDDQNTreechop3.mp4)
+
+![Rainbow trial 2 first 100 frames](static/release20190708/RainbowTreechop2.gif)  
+Rainbow trial 2 first 100 frames
+
+![PPO trial 1 first 100 frames](static/release20190708/PPOTreechop1.gif)  
+PPO trial 1 first 100 frames
+
+![DDDQN trial 3 first 100 frames](static/release20190708/DDDQNTreechop3.gif)  
+DDDQN trial 3 first 100 frames
 
 
 ## MineRLNavigateDense-v0
@@ -72,15 +82,24 @@ For `MineRLNavigateDense`, DDDQN achieves a score comparable to Rainbow/PPO.
 [The MineRL competition's original paper](https://arxiv.org/abs/1904.10079) reports the score of DDDQN (referred as "DQN" in the paper) as 55.59 +- 11.38, which is consistent with our result. (Our result is slightly worse than the original)
 
 Videos of trained agents during their last evaluation round:
-- [Rainbow trial 1](static/release20190708/RainbowNavigateDense1.mp4)
-- [Rainbow trial 2](static/release20190708/RainbowNavigateDense2.mp4)
-- [Rainbow trial 3](static/release20190708/RainbowNavigateDense3.mp4)
-- [PPO trial 1](static/release20190708/PPONavigateDense1.mp4)
-- [PPO trial 2](static/release20190708/PPONavigateDense2.mp4)
-- [PPO trial 3](static/release20190708/PPONavigateDense3.mp4)
-- [DDDQN trial 1](static/release20190708/DDDQNNavigateDense1.mp4)
-- [DDDQN trial 2](static/release20190708/DDDQNNavigateDense2.mp4)
-- [DDDQN trial 3](static/release20190708/DDDQNNavigateDense3.mp4)
+- [Rainbow trial 1 (reward ?)](static/release20190708/RainbowNavigateDense1.mp4)
+- [Rainbow trial 2 (reward 52.6)](static/release20190708/RainbowNavigateDense2.mp4)
+- [Rainbow trial 3 (reward 167.7)](static/release20190708/RainbowNavigateDense3.mp4)
+- [PPO trial 1 (reward 165.9)](static/release20190708/PPONavigateDense1.mp4)
+- [PPO trial 2 (reward 59.6)](static/release20190708/PPONavigateDense2.mp4)
+- [PPO trial 3 (reward 65.1)](static/release20190708/PPONavigateDense3.mp4)
+- [DDDQN trial 1 (reward 161.0)](static/release20190708/DDDQNNavigateDense1.mp4)
+- [DDDQN trial 2 (reward 18.2)](static/release20190708/DDDQNNavigateDense2.mp4)
+- [DDDQN trial 3 (reward 60.3)](static/release20190708/DDDQNNavigateDense3.mp4)
+
+![Rainbow trial 3 first 100 frames](static/release20190708/RainbowNavigateDense3.gif)  
+Rainbow trial 3 first 100 frames
+
+![PPO trial 1 first 100 frames](static/release20190708/PPONavigateDense1.gif)  
+PPO trial 1 first 100 frames
+
+![DDDQN trial 1 first 100 frames](static/release20190708/DDDQNNavigateDense1.gif)  
+DDDQN trial 1 first 100 frames
 
 
 ## MineRLNavigate-v0
@@ -90,27 +109,39 @@ Videos of trained agents during their last evaluation round:
 No algorithm could solve the `MineRLNavigate-v0` (a sparse reward task). Given the difficulties of utilizing RL algorithms for sparse reward tasks, we posit the need for additional methods such as reward shaping, smarter exploration strategies, utilizing expert trajectories, etc.
 
 Videos of trained agents during their last evaluation round:
-- [Rainbow trial 1](static/release20190708/RainbowNavigate1.mp4)
-- [Rainbow trial 2](static/release20190708/RainbowNavigate2.mp4)
-- [Rainbow trial 3](static/release20190708/RainbowNavigate3.mp4)
-- (NA) PPO trial 1
-- [PPO trial 2](static/release20190708/PPONavigate2.mp4)
-- [PPO trial 3](static/release20190708/PPONavigate3.mp4)
-- [DDDQN trial 1](static/release20190708/DDDQNNavigate1.mp4)
+- [Rainbow trial 1 (reward 0.0)](static/release20190708/RainbowNavigate1.mp4)
+- [Rainbow trial 2 (reward 0.0)](static/release20190708/RainbowNavigate2.mp4)
+- [Rainbow trial 3 (reward 0.0)](static/release20190708/RainbowNavigate3.mp4)
+- [PPO trial 1 (reward 0.0)](static/release20190708/PPONavigate1.mp4)
+- [PPO trial 2 (reward 0.0)](static/release20190708/PPONavigate2.mp4)
+- [PPO trial 3 (reward 0.0)](static/release20190708/PPONavigate3.mp4)
+- [DDDQN trial 1 (reward 0.0)](static/release20190708/DDDQNNavigate1.mp4)
 - (NA) DDDQN trial 2
-- [DDDQN trial 3](static/release20190708/DDDQNNavigate3.mp4)
+- [DDDQN trial 3 (reward 0.0)](static/release20190708/DDDQNNavigate3.mp4)
+
+![Rainbow trial 1 first 100 frames](static/release20190708/RainbowNavigate1.gif)  
+Rainbow trial 1 first 100 frames
+
+![PPO trial 1 first 100 frames](static/release20190708/PPONavigate1.gif)  
+PPO trial 1 first 100 frames
+
+![DDDQN trial 1 first 100 frames](static/release20190708/DDDQNNavigate1.gif)  
+DDDQN trial 1 first 100 frames
 
 
 ## MineRLObtainDiamond-v0
 
 `MineRLObtainDiamond-v0` is the ultimate goal for this competition. None of the baselines discussed above were able to solve this task.
-The action space shaping strategy we tried for this task is described in the "Exclusive actions" section.
+
+*Important notice*: the action space shaping strategy we tried for this task is different from
+`MineRLTreechop-v0`, `MineRLNavigateDense-v0` or `MineRLNavigate-v0`.
+The detail is described in the "Exclusive actions" section below.
 
 
 ## Prior knowledge for action/observation spaces
 
 For `MineRLTreechop-v0`, `MineRLNavigateDense-v0` and `MineRLNavigate-v0`, Rainbow/PPO/DDDQN shape the action/observation space based on prior domain knowledge about the tasks.
-This shaping was inspired by the [MineRL competition introductory paper's](https://arxiv.org/abs/1904.10079) implementations
+This shaping was inspired by the [MineRL competition proposal paper's](https://arxiv.org/abs/1904.10079) implementations
 ([Treechop](https://github.com/minerllabs/minerl/blob/master/tests/excluded/treechop_dqn_test.py),
 [Navigate](https://github.com/minerllabs/minerl/blob/master/tests/excluded/navigate_dqn_test.py)).
 
