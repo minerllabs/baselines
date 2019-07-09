@@ -47,7 +47,8 @@ See [MineRL installation](https://github.com/minerllabs/minerl#installation) and
 Talbe 1: (for "paper") Results over the best 100 contiguous episodes. +- denotes standard deviation.  
 (for "ours") Results over the best 100 contiguous episodes among three trials. +- denotes standard deviation.  
 We do not emphasize the best performance for Navigate since the standard deviation is very large.  
-See Table 1 of [proposal paper](https://arxiv.org/abs/1904.10079) for more information.
+See Table 1 of [proposal paper](https://arxiv.org/abs/1904.10079) for more information.  
+Note that our current implementation does not use trajectory data.
 
 
 The figures below show the *training* reward graphs for each algorithm with task-specific prior knowledge used to shape the action and observation space.  
