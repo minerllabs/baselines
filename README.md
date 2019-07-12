@@ -54,6 +54,6 @@ The MineRL Competition leverages a large-scale dataset of human demonstrations -
 To get started with some baselines check out the `chainerrl_baselines/` folder in this repository!
 
 ## Submitting
-** Submissions are coming soon! **
+**Submissions are coming soon!**
 
 
