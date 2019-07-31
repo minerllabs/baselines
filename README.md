@@ -1,4 +1,4 @@
-# MineRL 2019 Competition @ NeurIPS: Quick Start
+# MineRL 2019 Competition @ NeurIPS: Baselines
 **`Sample Efficient Reinforcement Learning Through Human Demonstrations`**
 
 [![PyPI version](https://badge.fury.io/py/minerl.svg)](https://badge.fury.io/py/minerl)
