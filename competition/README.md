@@ -1,4 +1,4 @@
-# MineRL 2019 Competition @ NeurIPS: Baselines
+# MineRL 2019 Competition @ NeurIPS: Baseline Submissions
 **`Sample Efficient Reinforcement Learning Through Human Demonstrations`**
 
 [![PyPI version](https://badge.fury.io/py/minerl.svg)](https://badge.fury.io/py/minerl)
@@ -15,14 +15,14 @@ This folder contains a set of baselines for solving the `MineRLObtainDiamond-v0`
 
 ![viewer|540x272](http://www.minerl.io/docs/_images/cropped_viewer.gif)
 
-## Getting Started w/ the Baselines
+## Getting Started w/ the Baseline Submissions
 
 
 **Prerequisites.** To get started with these baselines and incorporate them into your own submissions make sure you have:
 1. [Registered with the competition](https://www.aicrowd.com/challenges/neurips-2019-minerl-competition) on the main competition page,
-2. [Cloned your own submission starter template](https://github.com/AIcrowd/neurips2019_minerl_challenge_starter_kit) and [created a repository at AIcrowd](http://gitlab.aicrowd.com).
+2. [Cloned your own submission starter template](https://github.com/minerllabs/competition_submission_starter_template) and [created a repository at AIcrowd](http://gitlab.aicrowd.com).
 
-**Usage.** The various baselines associated with this competition are contained within this folder (`competition/`) as `git` repositories (submodules) which fork the [AIcrowd submission template](). 
+**Usage.** The various baselines associated with this competition are contained within this folder (`competition/`) as `git` repositories (submodules) which fork the [AIcrowd submission template](https://github.com/minerllabs/competition_submission_starter_template). 
 
 To download all of the baseline code run the following:
 ```
