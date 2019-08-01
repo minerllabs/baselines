@@ -32,6 +32,11 @@ general/ # General baselines for the 6+ `minerl` environments!
 
 To get started, do the following:
 1.  Install the `minerl` python package: http://www.minerl.io/docs/tutorials/index.html
+    - [Install JDK 8](http://www.minerl.io/docs/tutorials/index.html)
+    - Install the MineRL Pacakge
+        ```
+        pip3 install --upgrade minerl
+        ``` 
 2. Clone the baselines **recursively**:
     ```
     git clone https://github.com/minerllabs/baselines.git --recurse-submodules 
