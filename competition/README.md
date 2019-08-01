@@ -18,9 +18,9 @@ This folder contains a set of baselines for solving the `MineRLObtainDiamond-v0`
 ## Getting Started w/ the Baselines
 
 
-**Prerequisites.** To get started with these baseines and incorporate them into your own submissions make sure you have:
+**Prerequisites.** To get started with these baselines and incorporate them into your own submissions make sure you have:
 1. [Registered with the competition](https://www.aicrowd.com/challenges/neurips-2019-minerl-competition) on the main competition page,
-2. [Created your own submission repository]() by cloning the AIcrowd submission template and [creating a repository at AIcrowd](http://gitlab.aicrowd.com).
+2. [Cloned your own submission starter template](https://github.com/AIcrowd/neurips2019_minerl_challenge_starter_kit) and [created a repository at AIcrowd](http://gitlab.aicrowd.com).
 
 **Usage.** The various baselines associated with this competition are contained within this folder (`competition/`) as `git` repositories (submodules) which fork the [AIcrowd submission template](). 
 
