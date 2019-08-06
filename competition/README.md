@@ -27,7 +27,7 @@ This folder contains a set of baselines for solving the `MineRLObtainDiamond-v0`
 
 To download all of the baseline code run the following:
 ```
-git clone https://github.com/minerllabs/baselines.git --recurse-submodules --remote-subodules
+git clone https://github.com/minerllabs/baselines.git --recurse-submodules
 ```
 Each competition baseline is structured exactly as a submission to AIcrowd (containing `train.py`, `test.py`, etc.)  and contains a link to the its leaderboard score!
 
