@@ -97,8 +97,6 @@ def _main(args):
     def wrap_env(env, test):
         if test and args.monitor:
             # NOTE: wrapping order matters!
-            # API change in minerl-0.2.3; Uncomment when reset returns obs, info rather than just obs
-            # env = ResetTrimInfoWrapper(env)
             env = ObtainPoVWrapper(env)
             env = ContinuingTimeLimitMonitor(
                 env, os.path.join(args.outdir, 'monitor'),
