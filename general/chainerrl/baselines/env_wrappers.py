@@ -12,18 +12,6 @@ from gym.wrappers.monitoring.stats_recorder import StatsRecorder
 cv2.ocl.setUseOpenCL(False)
 logger = getLogger(__name__)
 
-
-class ResetTrimInfoWrapper(gym.Wrapper):
-    """Take first return value.
-
-    minerl's `env.reset()` returns tuple of `(obs, info)`
-    but existing agent implementations expect `reset()` returns `obs` only.
-    """
-    def reset(self, **kwargs):
-        obs, info = self.env.reset(**kwargs)
-        return obs
-
-
 class ContinuingTimeLimitMonitor(Monitor):
     """`Monitor` with ChainerRL's `ContinuingTimeLimit` support.
 

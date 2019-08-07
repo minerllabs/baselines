@@ -26,7 +26,7 @@ from q_functions import NatureDQNHead, A3CFF
 from env_wrappers import (
     SerialDiscreteActionWrapper, CombineActionWrapper, SerialDiscreteCombineActionWrapper,
     ContinuingTimeLimitMonitor,
-    MoveAxisWrapper, FrameSkip, ObtainPoVWrapper, PoVWithCompassAngleWrapper, ResetTrimInfoWrapper, GrayScaleWrapper)
+    MoveAxisWrapper, FrameSkip, ObtainPoVWrapper, PoVWithCompassAngleWrapper, GrayScaleWrapper)
 
 logger = getLogger(__name__)
 
@@ -131,7 +131,7 @@ def _main(args):
 
         # wrap env: observation...
         # NOTE: wrapping order matters!
-        env = ResetTrimInfoWrapper(env)
+
         if test and args.monitor:
             env = ContinuingTimeLimitMonitor(
                 env, os.path.join(args.outdir, 'monitor'),
