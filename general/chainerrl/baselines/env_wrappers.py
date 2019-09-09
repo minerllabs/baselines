@@ -12,6 +12,7 @@ from gym.wrappers.monitoring.stats_recorder import StatsRecorder
 cv2.ocl.setUseOpenCL(False)
 logger = getLogger(__name__)
 
+
 class ContinuingTimeLimitMonitor(Monitor):
     """`Monitor` with ChainerRL's `ContinuingTimeLimit` support.
 

@@ -1,4 +1,4 @@
 chainerrl>=0.7.0
-minerl
+minerl==0.2.3
 pydot
 matplotlib
