@@ -7,13 +7,12 @@ from future import standard_library
 standard_library.install_aliases()  # NOQA
 
 from cached_property import cached_property
-import chainer
 from chainer import functions as F
 
 from chainerrl.action_value import ActionValue
 
 
-class BranchedDiscreteActionValue(ActionValue):
+class BranchedActionValue(ActionValue):
     """Q-function output for a branched action space.
     Args:
         branches (list):

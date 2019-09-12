@@ -5,6 +5,9 @@ from chainer import functions as F
 from chainer import links as L
 
 import chainerrl
+from chainerrl.action_value import DiscreteActionValue
+
+from branched_action_values import BranchedActionValue
 
 
 class A3CFF(chainer.ChainList, chainerrl.agents.a3c.A3CModel):
@@ -196,7 +199,6 @@ class CNNBranchingQFunction(chainer.Chain, chainerrl.q_function.StateQFunction):
     def __call__(self, x):
         if self.use_tuple:
             batch_size = x[0].shape[0]
-            obs_size = len(x)
             h = x[0]
         else:
             batch_size = x.shape[0]
@@ -266,4 +268,4 @@ class CNNBranchingQFunction(chainer.Chain, chainerrl.q_function.StateQFunction):
         if len(self.branch_sizes) > 4:
             branches.append(DiscreteActionValue(q5))
 
-        return BranchedDiscreteActionValue(branches)
+        return BranchedActionValue(branches)

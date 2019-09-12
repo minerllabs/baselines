@@ -21,14 +21,11 @@ import sys
 import numpy as np
 
 import chainer
-from chainer import functions as F
-from chainer import links as L
 
 import minerl  # noqa: register MineRL envs as Gym envs.
 import gym
 import chainerrl
 from chainerrl import experiments, explorers
-from chainerrl.action_value import DiscreteActionValue
 from chainerrl.experiments.evaluator import Evaluator
 #from chainerrl.wrappers.atari_wrappers import FrameStack, ScaledFloatFrame
 from dqfd import DQfD, PrioritizedDemoReplayBuffer
@@ -43,7 +40,6 @@ from env_wrappers import (
     MoveAxisWrapper, FrameSkip, FrameStack, ObtainPoVWrapper,
     PoVWithCompassAngleWrapper, FullObservationSpaceWrapper)
 from expert_converter import choose_top_experts, fill_buffer
-from branched_action_values import BranchedDiscreteActionValue
 
 
 class ScaleGradHook(object):
@@ -213,7 +209,7 @@ def main():
             env = BranchedRandomizedAction(env, branch_sizes, args.eval_epsilon)
 
         env_seed = test_seed if test else train_seed
-        # env.seed(int(env_seed))  # TODO: not supported yet
+        env.seed(int(env_seed))
         return env
 
     core_env = gym.make(args.env)
