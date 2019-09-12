@@ -13,6 +13,17 @@ cv2.ocl.setUseOpenCL(False)
 logger = getLogger(__name__)
 
 
+class ResetTrimInfoWrapper(gym.Wrapper):
+    """Take first return value.
+
+    minerl's `env.reset()` returns tuple of `(obs, info)`
+    but existing agent implementations expect `reset()` returns `obs` only.
+    """
+    def reset(self, **kwargs):
+        obs, info = self.env.reset(**kwargs)
+        return obs
+
+
 class ContinuingTimeLimitMonitor(Monitor):
     """`Monitor` with ChainerRL's `ContinuingTimeLimit` support.
 
@@ -138,6 +149,67 @@ class PoVWithCompassAngleWrapper(gym.ObservationWrapper):
         return np.concatenate([pov, compass_channel], axis=-1)
 
 
+class UnifiedObservationWrapper(gym.ObservationWrapper):
+    """Take 'pov', 'compassAngle', 'inventory' and concatenate with scaling.
+    """
+    def __init__(self, env, region_size=8):
+        super().__init__(env)
+
+        self._compass_angle_scale = 180 / 255  # NOTE: `ScaledFloatFrame` will scale the pixel values with 255.0 later
+        self.region_size = region_size
+
+        pov_space = self.env.observation_space.spaces['pov']
+        low_dict = {'pov': pov_space.low}
+        high_dict = {'pov': pov_space.high}
+
+        if 'compassAngle' in self.env.observation_space.spaces:
+            compass_angle_space = self.env.observation_space.spaces['compassAngle']
+            low_dict['compassAngle'] = compassAngle.low
+            high_dict['compassAngle'] = compassAngle.high
+
+        if 'inventory' in self.env.observation_space.spaces:
+            inventory_space = self.env.observation_space.spaces['inventory']
+            low_dict['inventory'] = {}
+            high_dict['inventory'] = {}
+            for key in inventory_space.spaces.keys():
+                low_dict['inventory'][key] = inventory_space.spaces[key].low
+                high_dict['inventory'][key] = inventory_space.spaces[key].high
+
+        low = self.observation(low_dict)
+        high = self.observation(high_dict)
+
+        self.observation_space = gym.spaces.Box(low=low, high=high)
+
+    def observation(self, observation):
+        obs = observation['pov']
+        pov_dtype = obs.dtype
+
+        if 'compassAngle' in observation:
+            compass_scaled = observation['compassAngle'] / self._compass_angle_scale
+            compass_channel = np.ones(shape=list(obs.shape[:-1]) + [1], dtype=pov_dtype) * compass_scaled
+            obs = np.concatenate([obs, compass_channel], axis=-1)
+        if 'inventory' in observation:
+            assert len(obs.shape[:-1]) == 2
+            region_max_height = obs.shape[0]
+            region_max_width = obs.shape[1]
+            rs = self.region_size
+            if min(region_max_height, region_max_width) < rs:
+                raise ValueError("'region_size' is too large.")
+            num_element_width = region_max_width // rs
+            inventory_channel = np.zeros(shape=list(obs.shape[:-1]) + [1], dtype=pov_dtype)
+            for idx, key in enumerate(observation['inventory']):
+                item_scaled = np.clip(255 - 255 / (observation['inventory'][key] + 1),  # Inversed
+                                      0, 255)
+                item_channel = np.ones(shape=[rs, rs, 1], dtype=pov_dtype) * item_scaled
+                width_low = (idx % num_element_width) * rs
+                height_low = (idx // num_element_width) * rs
+                if height_low + rs > region_max_height:
+                    raise ValueError("Too many elements on 'inventory'. Please decrease 'region_size' of each component")
+                inventory_channel[height_low:(height_low + rs), width_low:(width_low + rs), :] = item_channel
+            obs = np.concatenate([obs, inventory_channel], axis=-1)
+        return obs
+
+
 class MoveAxisWrapper(gym.ObservationWrapper):
     """Move axes of observation ndarrays."""
     def __init__(self, env, source, destination):
@@ -179,7 +251,9 @@ class GrayScaleWrapper(gym.ObservationWrapper):
         if self._key is None:
             self.observation_space = new_space
         else:
-            self.observation_space.spaces[self._key] = new_space
+            new_space_dict = copy.deepcopy(self.observation_space)
+            new_space_dict.spaces[self._key] = new_space
+            self.observation_space = new_space_dict
 
     def observation(self, obs):
         if self._key is None:
@@ -215,11 +289,17 @@ class SerialDiscreteActionWrapper(gym.ActionWrapper):
         List of action keys, which should be ignored for discretizing action space.
     exclude_noop
         The "noop" will be excluded from discrete action list.
+    num_camera_discretize
+        Number of discretization of yaw control (must be odd).
+    max_camera_range
+        Maximum value of yaw control.
     """
 
     BINARY_KEYS = ['forward', 'back', 'left', 'right', 'jump', 'sneak', 'sprint', 'attack']
 
-    def __init__(self, env, always_keys=None, reverse_keys=None, exclude_keys=None, exclude_noop=False):
+    def __init__(self, env, always_keys=None, reverse_keys=None, exclude_keys=None, exclude_noop=False,
+                 num_camera_discretize=3, allow_pitch=False,
+                 max_camera_range=10):
         super().__init__(env)
 
         self.always_keys = [] if always_keys is None else always_keys
@@ -232,6 +312,7 @@ class SerialDiscreteActionWrapper(gym.ActionWrapper):
         self.exclude_noop = exclude_noop
 
         self.wrapping_action_space = self.env.action_space
+        self.num_camera_discretize = num_camera_discretize
         self._noop_template = OrderedDict([
             ('forward', 0),
             ('back', 0),
@@ -240,7 +321,7 @@ class SerialDiscreteActionWrapper(gym.ActionWrapper):
             ('jump', 0),
             ('sneak', 0),
             ('sprint', 0),
-            ('attack' , 0),
+            ('attack', 0),
             ('camera', np.zeros((2, ), dtype=np.float32)),
             # 'none', 'dirt' (Obtain*:)+ 'stone', 'cobblestone', 'crafting_table', 'furnace', 'torch'
             ('place', 0),
@@ -295,13 +376,32 @@ class SerialDiscreteActionWrapper(gym.ActionWrapper):
                     op[key] = 1
                 self._actions.append(op)
             elif key == 'camera':
-                # action candidate : {[0, -10], [0, 10]}
-                op = copy.deepcopy(self.noop)
-                op[key] = np.array([0, -10], dtype=np.float32)
-                self._actions.append(op)
-                op = copy.deepcopy(self.noop)
-                op[key] = np.array([0, 10], dtype=np.float32)
-                self._actions.append(op)
+                # action candidate : {[0, -max_camera_range], [0, -max_camera_range + delta_range], ..., [0, max_camera_range]}
+                # ([0, 0] is excluded)
+                delta_range = max_camera_range * 2 / (self.num_camera_discretize - 1)
+                if self.num_camera_discretize % 2 == 0:
+                    raise ValueError('Number of yaw discretization must be odd.')
+                for i in range(self.num_camera_discretize):
+                    op = copy.deepcopy(self.noop)
+                    if i < self.num_camera_discretize // 2:
+                        op[key] = np.array([0, -max_camera_range + delta_range * i], dtype=np.float32)
+                    elif i > self.num_camera_discretize // 2:
+                        op[key] = np.array([0, -max_camera_range + delta_range * (i - 1)], dtype=np.float32)
+                    else:
+                        continue
+                    self._actions.append(op)
+
+                if allow_pitch:
+                    for i in range(self.num_camera_discretize):
+                        op = copy.deepcopy(self.noop)
+                        if i < self.num_camera_discretize // 2:
+                            op[key] = np.array([-max_camera_range + delta_range * i, 0], dtype=np.float32)
+                        elif i > self.num_camera_discretize // 2:
+                            op[key] = np.array([-max_camera_range + delta_range * (i - 1), 0], dtype=np.float32)
+                        else:
+                            continue
+                        self._actions.append(op)
+
             elif key in {'place', 'equip', 'craft', 'nearbyCraft', 'nearbySmelt'}:
                 # action candidate : {1, 2, ..., len(space)-1}  (0 is ignored because it is for noop)
                 for a in range(1, self.wrapping_action_space.spaces[key].n):
@@ -336,6 +436,7 @@ class CombineActionWrapper(gym.ActionWrapper):
     The combined action's names will be concatenation of originals, i.e.,
     "forward_back", "left_right", "snaek_sprint", "attack_place_equip_craft_nearbyCraft_nearbySmelt".
     """
+    # TODO: num_camera_discretize?
     def __init__(self, env):
         super().__init__(env)
 
@@ -454,3 +555,184 @@ class SerialDiscreteCombineActionWrapper(gym.ActionWrapper):
         original_space_action = self._actions[action]
         logger.debug('discrete action {} -> original action {}'.format(action, original_space_action))
         return original_space_action
+
+
+class NormalizedContinuousActionWrapper(gym.ActionWrapper):
+    """Convert MineRL env's `Dict` action space as a continuous action space.
+
+    Parameters
+    ----------
+    env
+        Wrapping gym environment.
+
+    """
+
+    BINARY_KEYS = ['forward', 'back', 'left', 'right', 'jump', 'sneak', 'sprint', 'attack']
+
+    def __init__(self, env, disable_pitch=False, max_camera_range=10):
+        super().__init__(env)
+        self.disable_pitch = disable_pitch
+        self.wrapping_action_space = self.env.action_space
+        self._noop_template = OrderedDict([
+            ('forward', 0),
+            ('back', 0),
+            ('left', 0),
+            ('right', 0),
+            ('jump', 0),
+            ('sneak', 0),
+            ('sprint', 0),
+            ('attack', 0),
+            ('camera', np.zeros((2, ), dtype=np.float32)),
+            # 'none', 'dirt' (Obtain*:)+ 'stone', 'cobblestone', 'crafting_table', 'furnace', 'torch'
+            ('place', 0),
+            # (Obtain* tasks only) 'none', 'wooden_axe', 'wooden_pickaxe', 'stone_axe', 'stone_pickaxe', 'iron_axe', 'iron_pickaxe'
+            ('equip', 0),
+            # (Obtain* tasks only) 'none', 'torch', 'stick', 'planks', 'crafting_table'
+            ('craft', 0),
+            # (Obtain* tasks only) 'none', 'wooden_axe', 'wooden_pickaxe', 'stone_axe', 'stone_pickaxe', 'iron_axe', 'iron_pickaxe', 'furnace'
+            ('nearbyCraft', 0),
+            # (Obtain* tasks only) 'none', 'iron_ingot', 'coal'
+            ('nearbySmelt', 0),
+        ])
+        for key, space in self.wrapping_action_space.spaces.items():
+            if key not in self._noop_template:
+                raise ValueError('Unknown action name: {}'.format(key))
+
+        # get noop
+        self.noop = copy.deepcopy(self._noop_template)
+        for key in self._noop_template:
+            if key not in self.wrapping_action_space.spaces:
+                del self.noop[key]
+
+        value_means = []
+        value_ranges = []
+        self.is_binary = []
+        for key in self.noop:
+            if key in self.BINARY_KEYS:
+                value_means.append(0.5)
+                value_ranges.append(0.5)
+                self.is_binary.append(True)
+            elif key == 'camera':
+                value_means.append(0)
+                value_means.append(0)
+                self.is_binary.append(False)
+                value_ranges.append(max_camera_range)
+                value_ranges.append(max_camera_range)
+                self.is_binary.append(False)
+            elif key in {'place', 'craft', 'nearbyCraft', 'nearbySmelt'}:
+                # TODO: implementation
+                value_means.append(0)
+                value_ranges.append(0)
+        self.value_means = np.array(value_means, dtype=np.float32)
+        self.value_ranges = np.array(value_ranges, dtype=np.float32)
+
+        n = len(self.value_means)
+        self.action_space = gym.spaces.Box(low=-np.ones(n), high=np.ones(n), dtype=np.float32)
+        logger.info('{} is converted to {}.'.format(self.wrapping_action_space, self.action_space))
+
+    def _action(self, action):
+        original_action = copy.deepcopy(self.noop)
+        idx = 0
+        for key, is_binary in zip(self.noop, self.is_binary):
+            if key == 'camera':
+                orig_values = np.clip(action[idx:idx + 2], -1, 1)
+                values = (orig_values * self.value_ranges[idx:idx + 2]
+                          + self.value_means[idx:idx + 2])
+                if self.disable_pitch:
+                    values[0] = 0
+
+                original_action[key] = values
+                idx += 2
+            elif is_binary:
+                value = (action[idx] * self.value_ranges[idx]
+                         + self.value_means[idx])
+                if np.random.rand() < value:
+                    original_action[key] = 1
+                else:
+                    original_action[key] = 0
+                idx += 1
+            else:
+                # noop
+                # value = (action[idx] * self.value_ranges[idx]
+                #          + self.value_means[idx])
+                # original_action[key] = value
+                idx += 1
+        return original_action
+
+
+class MultiDimensionalSoftmaxActionWrapper(gym.ActionWrapper):
+    BINARY_KEYS = ['forward', 'back', 'left', 'right', 'jump', 'sneak', 'sprint', 'attack']
+
+    def __init__(self, env, max_camera_range=10,
+                 num_camera_discretize=7):
+        super().__init__(env)
+
+        self.max_camera_range = max_camera_range
+        self.num_camera_discretize = num_camera_discretize
+        self.wrapping_action_space = self.env.action_space
+        self.noop = OrderedDict([
+            ('forward', 0),
+            ('back', 0),
+            ('left', 0),
+            ('right', 0),
+            ('jump', 0),
+            ('sneak', 0),
+            ('sprint', 0),
+            ('attack', 0),
+            ('camera', np.zeros((2, ), dtype=np.float32)),
+            # 'none', 'dirt' (Obtain*:)+ 'stone', 'cobblestone', 'crafting_table', 'furnace', 'torch'
+            ('place', 0),
+            # (Obtain* tasks only) 'none', 'wooden_axe', 'wooden_pickaxe', 'stone_axe', 'stone_pickaxe', 'iron_axe', 'iron_pickaxe'
+            ('equip', 0),
+            # (Obtain* tasks only) 'none', 'torch', 'stick', 'planks', 'crafting_table'
+            ('craft', 0),
+            # (Obtain* tasks only) 'none', 'wooden_axe', 'wooden_pickaxe', 'stone_axe', 'stone_pickaxe', 'iron_axe', 'iron_pickaxe', 'furnace'
+            ('nearbyCraft', 0),
+            # (Obtain* tasks only) 'none', 'iron_ingot', 'coal'
+            ('nearbySmelt', 0),
+        ])
+        for key, space in self.wrapping_action_space.spaces.items():
+            if key not in self.noop:
+                raise ValueError('Unknown action name: {}'.format(key))
+
+        _noop_template = copy.deepcopy(self.noop)
+        for key in _noop_template:
+            if key not in self.wrapping_action_space.spaces:
+                del self.noop[key]
+
+        # get each discrete action
+        self._actions = [self.noop]
+        num_actions = []
+        action_dict = OrderedDict({})
+        for key in self.noop:
+            if key == 'camera':
+                num_actions.append(self.num_camera_discretize)
+                num_actions.append(self.num_camera_discretize)
+            else:
+                num_actions.append(self.wrapping_action_space.spaces[key].n)
+        self.action_space = gym.spaces.Box(
+            low=np.zeros_like(num_actions),
+            high=(np.array(num_actions) - 1),
+            dtype=np.int32)
+        logger.info('{} is converted to {}.'.format(self.wrapping_action_space, self.action_space))
+
+    def action(self, action):
+        original_action = OrderedDict(copy.deepcopy(self.noop))
+        half_scale = (self.num_camera_discretize - 1) / 2
+        idx = 0
+        for key in self.noop:
+            if key == 'camera':
+                original_action['camera'][0] = (
+                    self.max_camera_range
+                    * (action[idx] - half_scale)
+                    / half_scale)
+                original_action['camera'][1] = (
+                    self.max_camera_range
+                    * (action[idx + 1] - half_scale)
+                    / half_scale)
+                idx += 2
+            else:
+                original_action[key] = int(action[idx])
+                idx += 1
+        logger.debug('discrete action {} -> original action {}'.format(action, original_action))
+        return original_action
