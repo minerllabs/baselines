@@ -1,4 +1,4 @@
-"""original source: https://github.com/ummavi/chainerrl/blob/dqfd/examples/gym/train_dqfd_gym.py
+"""original source: https://github.com/chainer/chainerrl/pull/480
 
 MIT License
 
@@ -27,12 +27,7 @@ import gym
 import chainerrl
 from chainerrl import experiments, explorers
 from chainerrl.experiments.evaluator import Evaluator
-#from chainerrl.wrappers.atari_wrappers import FrameStack, ScaledFloatFrame
 from dqfd import DQfD, PrioritizedDemoReplayBuffer
-
-#current_dir = os.path.dirname(os.path.abspath(getsourcefile(lambda:0)))
-#parent_dir = current_dir[:current_dir.rfind(os.path.sep)]
-#sys.path.insert(0, parent_dir)
 
 from q_functions import CNNBranchingQFunction
 from env_wrappers import (

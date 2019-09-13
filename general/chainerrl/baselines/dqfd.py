@@ -533,14 +533,6 @@ class DQfD(DoubleDQN):
         loss_combined.backward()
         self.optimizer.update()
 
-        batch_size = q_demos.shape[0]
-        chosen_a = self.qout.xp.zeros_like(q_demos.array)
-        pos = 0
-        for i, branch in enumerate(self.qout.branches):
-            chosen_a[self.qout.xp.arange(
-                batch_size), self.qout.greedy_actions[num_exp_agent:].array[:, i] + pos] = 1
-            pos += branch.q_values.shape[1]
-
         self.average_loss *= self.average_loss_decay
         self.average_loss += (1 - self.average_loss_decay) * \
             float(loss_combined.array)
