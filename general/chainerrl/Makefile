@@ -3,7 +3,7 @@ CONTAINER_NAME=chainerrl-baselines
 CONTAINER_TAG=:v0.0.0
 IMAGE_NAME=kumezawa/$(CONTAINER_NAME)$(CONTAINER_TAG)
 
-DOCKER_CMD=
+DOCKER_CMD=tail -f /dev/null
 
 build:
 	docker build -t $(IMAGE_NAME) .

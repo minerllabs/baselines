@@ -23,15 +23,3 @@ RUN apt-get update && apt-get install -y \
     python-opengl\
     x11-xserver-utils\
  && rm -rf /var/lib/apt/lists/*
-
-# Install jupyter notebook
-RUN pip install jupyter pandas matplotlib numpy scipy sklearn
-
-# Create starting file
-RUN echo "xhost + & jupyter notebook --allow-root --ip 0.0.0.0" > /app/xvfb.sh
-RUN echo "xvfb-run -s \"-screen 0 1400x900x24\" /app/xvfb.sh" > /app/run.sh
-RUN chmod ugo+x /app/xvfb.sh
-RUN chmod ugo+x /app/run.sh
-
-# Set the default command to jupyter
-CMD ["sh", "/app/run.sh"]
