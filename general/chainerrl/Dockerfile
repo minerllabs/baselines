@@ -22,4 +22,7 @@ RUN apt-get update && apt-get install -y \
     xvfb \
     python-opengl\
     x11-xserver-utils\
+    libglu1-mesa-dev\
+    freeglut3-dev\
+    mesa-common-dev\
  && rm -rf /var/lib/apt/lists/*
