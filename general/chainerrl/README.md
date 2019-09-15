@@ -13,8 +13,8 @@ This repository contains a set of baselines implementations to help you get star
 # Installation
 
 ```sh
-git clone git@github.com:minerllabs/quick_start.git
-cd quick_start/chainerrl_baselines
+git clone git@github.com:minerllabs/baselines.git
+cd baselines/general/chainerrl
 pip install -r requirements.txt
 ```
 
