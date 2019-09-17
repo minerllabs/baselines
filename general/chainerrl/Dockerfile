@@ -20,9 +20,10 @@ COPY . .
 RUN apt-get update && apt-get install -y \
     libx11-6 \
     xvfb \
-    python-opengl\
-    x11-xserver-utils\
-    libglu1-mesa-dev\
-    freeglut3-dev\
-    mesa-common-dev\
+    python-opengl \
+    x11-xserver-utils \
+    libglu1-mesa-dev \
+    freeglut3-dev \
+    mesa-common-dev \
+    mesa-utils \
  && rm -rf /var/lib/apt/lists/*
