@@ -1,4 +1,4 @@
-chainerrl>=0.7.0
+git+git://github.com/chainer/chainerrl.git@b14faec0456f811b086322d1d25ba90806f1f82a
 minerl
 pydot
 matplotlib
