@@ -114,52 +114,49 @@ class FrameStack(gym.Wrapper):
         """
         gym.Wrapper.__init__(self, env)
         self.k = k
-        self.frames = deque([], maxlen=k)
+        self.observations = deque([], maxlen=k)
         self.stack_axis = {'hwc': 2, 'chw': 0}[channel_order]
         self.use_tuple = use_tuple
 
         if self.use_tuple:
             pov_space = env.observation_space[0]
+            inv_space = env.observation_space[1]
         else:
             pov_space = env.observation_space
 
-        low = np.repeat(pov_space.low, k, axis=self.stack_axis)
-        high = np.repeat(pov_space.high, k, axis=self.stack_axis)
-        pov_space = gym.spaces.Box(low=low, high=high, dtype=pov_space.dtype)
+        low_pov = np.repeat(pov_space.low, k, axis=self.stack_axis)
+        high_pov = np.repeat(pov_space.high, k, axis=self.stack_axis)
+        pov_space = gym.spaces.Box(low=low_pov, high=high_pov, dtype=pov_space.dtype)
 
         if self.use_tuple:
-            inventory_space = env.observation_space[1]
+            low_inv = np.repeat(inv_space.low, k, axis=0)
+            high_inv = np.repeat(inv_space.low, k, axis=0)
+            inv_space = gym.spaces.Box(low=low_inv, high=high_inv, dtype=inv_space.dtype)
             self.observation_space = gym.spaces.Tuple(
-                (pov_space, inventory_space))
+                (pov_space, inv_space))
         else:
             self.observation_space = pov_space
 
     def reset(self):
         ob = self.env.reset()
-        if self.use_tuple:
-            for _ in range(self.k):
-                self.frames.append(ob[0])
-            return (self._get_ob(), ob[1])
-        else:
-            for _ in range(self.k):
-                self.frames.append(ob)
-            return self._get_ob()
+        for _ in range(self.k):
+            self.observations.append(ob)
+        return self._get_ob()
 
     def step(self, action):
         ob, reward, done, info = self.env.step(action)
-
-        if self.use_tuple:
-            self.frames.append(ob[0])
-            stacked_ob = (self._get_ob(), ob[1])
-        else:
-            self.frames.append(ob)
-            stacked_ob = self._get_ob()
-
-        return stacked_ob, reward, done, info
+        self.frames.append(ob)
+        return self._get_ob(), reward, done, info
 
     def _get_ob(self):
-        assert len(self.frames) == self.k
-        return LazyFrames(list(self.frames), stack_axis=self.stack_axis)
+        assert len(self.observations) == self.k
+        if self.use_tuple:
+            frames = [x[0] for x in self.observations]
+            inventory = [x[1] for x in self.observations]
+            return (LazyFrames(list(frames), stack_axis=self.stack_axis),
+                    LazyFrames(list(inventory), stack_axis=0))
+        else:
+            return LazyFrames(list(self.frames), stack_axis=self.stack_axis)
 
 
 class ObtainPoVWrapper(gym.ObservationWrapper):

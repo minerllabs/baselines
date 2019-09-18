@@ -1,9 +1,8 @@
-import argparse
 import os
 import cv2
 import glob
 import time
-from collections import defaultdict, deque
+from collections import deque
 from logging import getLogger
 import numpy as np
 
@@ -145,7 +144,11 @@ def fill_buffer(env_name, chosen_dirs, replay_buffer, frameskip, frame_stack,
         cap = cv2.VideoCapture(video_file)
         others = np.load(other_file)
         length = others['reward'].shape[0]
-        logger.info("Length: {}".format(length))
+        logger.info("Length of rewards array: {}".format(length))
+        if env_name.startswith('MineRLNavigate'):
+            assert(len(others['observation_compassAngle']) == length + 1)
+        if 'observation_inventory' in others:
+            assert(len(others['observation_inventory']) == length + 1)
 
         # set expert observations
         frames = []
@@ -153,9 +156,6 @@ def fill_buffer(env_name, chosen_dirs, replay_buffer, frameskip, frame_stack,
         frame_idx = 0
 
         while True:
-            if frame_idx >= length + 1:
-                break
-
             ret, frame = cap.read()
             # (64, 64, 3) -> (3, 64, 64)
             if ret:
@@ -163,24 +163,26 @@ def fill_buffer(env_name, chosen_dirs, replay_buffer, frameskip, frame_stack,
                     raise Exception(
                         "Image size is not (64, 64). Dir: {}".format(dr))
 
-                if use_compass and not use_full_observation:
-                    compass_scaled = others['observation_compassAngle'][frame_idx] / compass_angle_scale
-                    compas_channel = np.ones(shape=list(
-                        frame.shape[:-1]) + [1], dtype=frame.dtype) * compass_scaled
-                    frame = np.concatenate([frame, compass_channel], axis=-1)
+                if frame_idx < length + 1:
+                    if use_compass and not use_full_observation:
+                        compass_scaled = others['observation_compassAngle'][frame_idx] / compass_angle_scale
+                        compass_channel = np.ones(shape=list(
+                            frame.shape[:-1]) + [1], dtype=frame.dtype) * compass_scaled
+                        frame = np.concatenate(
+                            [frame, compass_channel], axis=-1)
 
-                if use_full_observation:
-                    obs = []
+                    if use_full_observation:
+                        obs = []
 
-                    if env_name.startswith('MineRLNavigate'):
-                        compass_scaled = others['observation_compassAngle'][frame_idx] / 180
-                        obs.append(compass_scaled)
+                        if env_name.startswith('MineRLNavigate'):
+                            compass_scaled = others['observation_compassAngle'][frame_idx] / 180
+                            obs.append(compass_scaled)
 
-                    if 'observation_inventory' in others:
-                        inventory = others['observation_inventory'][frame_idx, :] / 2304
-                        obs.extend(list(inventory))
+                        if 'observation_inventory' in others:
+                            inventory = others['observation_inventory'][frame_idx, :] / 2304
+                            obs.extend(list(inventory))
 
-                    other_obs.append(obs)
+                        other_obs.append(obs)
 
                 # (64, 64, 3) -> (3, 64, 64)
                 frame = np.moveaxis(frame, -1, 0)
@@ -190,16 +192,20 @@ def fill_buffer(env_name, chosen_dirs, replay_buffer, frameskip, frame_stack,
             frame_idx += 1
         cap.release()
 
+        logger.info("Number of frames: {}".format(len(frames)))
+
         if len(frames) < length + 1:
             raise Exception(
-                "Frame length is smaller than data length. Ignored.")
+                "Frame length is smaller than data length.")
 
         # delete initial frames to align with actions
         frames = frames[-length - 1:]
-        other_obs = other_obs[-length - 1:]
-        frames_q = deque([], maxlen=frame_stack)
+        obs_q = deque([], maxlen=frame_stack)
         for i in range(frame_stack):
-            frames_q.append(frames[0])
+            if use_full_observation:
+                obs_q.append((frames[0], other_obs[0]))
+            else:
+                obs_q.append(frames[0])
 
         for x in range(0, length, frameskip):
             actions = get_encoded_action(env_name, others, x, frameskip,
@@ -208,27 +214,20 @@ def fill_buffer(env_name, chosen_dirs, replay_buffer, frameskip, frame_stack,
                 done = True
             else:
                 done = False
-            if x + frameskip < len(frames):
-                next_frame = frames[x + frameskip]
-                if use_full_observation:
-                    next_other = other_obs[x + frameskip]
-            else:
-                next_frame = frames[-1]
-                if use_full_observation:
-                    next_other = other_obs[-1]
 
             if use_full_observation:
-                obs = (LazyFrames(list(frames_q), stack_axis=0), other_obs[x])
+                obs = (LazyFrames([x[0] for x in obs_q], stack_axis=0),
+                       LazyFrames([x[1] for x in obs_q], stack_axis=0))
+                next_frame = frames[min(x + frameskip, length)]
+                next_other = other_obs[min(x + frameskip, length)]
+                obs_q.append((next_frame, next_other))
+                next_obs = (LazyFrames([x[0] for x in obs_q], stack_axis=0),
+                            LazyFrames([x[1] for x in obs_q], stack_axis=0))
             else:
-                obs = LazyFrames(list(frames_q), stack_axis=0)
-
-            frames_q.append(next_frame)
-
-            if use_full_observation:
-                next_obs = (LazyFrames(list(frames_q),
-                                       stack_axis=0), next_other)
-            else:
-                next_obs = LazyFrames(list(frames_q), stack_axis=0)
+                obs = LazyFrames(list(obs_q), stack_axis=0)
+                next_frame = frames[min(x + frameskip, length)]
+                obs_q.append(next_frame)
+                next_obs = LazyFrames(list(obs_q), stack_axis=0)
 
             reward = others['reward'][x:x + frameskip].sum()
 
