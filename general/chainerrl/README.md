@@ -23,14 +23,22 @@ See [MineRL installation](https://github.com/minerllabs/minerl#installation) and
 
 # Getting started
 
-- [baselines/dddqn.sh]
-    - Double Dueling DQN (DDDQN), with implementation and hyperparameters as described in the [proposal paper](https://arxiv.org/abs/1904.10079) (code: [here](https://github.com/minerllabs/minerl/blob/master/tests/excluded/navigate_dqn_test.py) and [here](https://github.com/minerllabs/minerl/blob/master/tests/excluded/treechop_dqn_test.py)).
-- [baselines/rainbow.sh]
-    - Rainbow
-- [baselines/ppo.sh]
-    - PPO
+1. Dataset download
+  - In order to run Behavoral Cloning and GAIL agents, you need to download expert dataset into an appropriate place (by default, `baselines/expert_dataset`).
+1. Training
+  - [baselines/dddqn.sh]
+      - Double Dueling DQN (DDDQN), with implementation and hyperparameters as described in the [proposal paper](https://arxiv.org/abs/1904.10079) (code: [here](https://github.com/minerllabs/minerl/blob/master/tests/excluded/navigate_dqn_test.py) and [here](https://github.com/minerllabs/minerl/blob/master/tests/excluded/treechop_dqn_test.py)).
+  - [baselines/rainbow.sh]
+      - Rainbow
+  - [baselines/ppo.sh]
+      - PPO
+  - [baselines/behavoral_cloning.sh]
+      - Behavoral Cloning (BC)
+  - [baselines/gail.sh]
+      - GAIL
 
-# Experimental results of DDDQN/Rainbow/PPO
+
+# Overview of experimental results of DDDQN/Rainbow/PPO/BC/GAIL
 
 |                    | Treechop           | Navigate         | NavigateDense      |
 | :---               | ---:               | ---:             | ---:               |
@@ -41,18 +49,24 @@ See [MineRL installation](https://github.com/minerllabs/minerl#installation) and
 | (**ours**) DDDQN   | 9.68 +- 5.28       | 5.00 +- 21.79    | 57.84 +- 50.74     |
 | (**ours**) Rainbow | **60.39 +- 19.88** | 9.00 +- 28.62    | 66.48 +- 38.73     |
 | (**ours**) PPO     | 38.44 +- 19.04     | 6.00 +- 23.75    | 80.84 +- 51.29     |
+| (**ours**) BC      | abc +- def         | abc +- def       | abc +- def         |
+| (**ours**) GAIL    | abc +- def         | abc +- def       | abc +- def         |
 | (paper) Human      | 64.00 +- 0.00      | 100.00 +- 0.00   | 164.00 +- 0.00     |
 | (paper) Random     | 3.81 +- 0.57       | 1.00 +- 1.95     | -4.37 +- 5.10      |
 
-Talbe 1: (for "paper") Results over the best 100 contiguous episodes. +- denotes standard deviation.  
+Table 1: (for "paper") Results over the best 100 contiguous episodes. +- denotes standard deviation.  
 (for "ours") Results over the best 100 contiguous episodes among three trials. +- denotes standard deviation.  
 We do not emphasize the best performance for Navigate since the standard deviation is very large.  
 See Table 1 of [proposal paper](https://arxiv.org/abs/1904.10079) for more information.  
 Note that our current implementation does not use trajectory data.
 
+For experiments of DDDQN/Rainbow/PPO, we used **MineRL v0.1.18** which is the latest as of July 9, 2019.
+For experiments of BC/GAIL, we used **MineRL v0.2.3**.
 
-The figures below show the *training* reward graphs for each algorithm with task-specific prior knowledge used to shape the action and observation space.  
-For experitments, we used **MineRL v0.1.18** which is the latest as of July 9, 2019.  
+
+# Experimental results of DDDQN/Rainbow/PPO
+
+The figures below show the *training* reward graphs for each of DDDQN/Rainbow/PPO with task-specific prior knowledge used to shape the action and observation space.
 
 The exact hyperparameters used for each algorithm can be found from the links in the "Getting Started" section and their corresponding Python scripts (`baselines/dqn_family.py`, `baselines/ppo.py`).
 
@@ -171,6 +185,7 @@ The set of action_space keys are different among tasks, but some of them are com
 `env_wrappers.SerialDiscreteActionWrapper` is the corresponding code for shaping the action space.
 
 The following sections describe the various strategies we employed in the shaping of the action space.
+
 ### Discretizing
 
 The only action key which is continuous is `camera`.
@@ -190,7 +205,7 @@ These actions are removed from the agent's action choice.
 
 Actions specified as `--exclude-keys` are simply disabled and they will be never triggered.
 
-For example, 
+For example,
 On `MineRLTreechop-v0`,
   - `--always-keys`: `attack`
   - `--exclude-keys`: `back`, `left`, `right`, `sneak`, `sprint`
@@ -248,3 +263,56 @@ Resulting action spaces after shaped with prior knowledge are:
   4. `{'jump': 0, 'camera': [0, 10]}`  
   Note that `forward`, `sprint`, `attack` are always `1` and `back`, `left`, `right`, `sneak`, `place` are always `0`.
 - Obtain*: `Discrete(36)`
+
+# Experimental results of BC/GAIL
+
+The figures below show the *training* reward graphs for each of BC/GAIL with converting criteria of expert dataset.
+
+The exact hyperparameters used for each algorithm can be found from the links in the "Getting Started" section and their corresponding Python scripts (`baselines/behavoral_cloning.py`, `baselines/gail.py`).
+
+## MineRLTreechop-v0
+
+**TODO: PUT AN IMAGE**
+
+The figure above shows the performance of the algorithms during the training phase on the `MineRLTreechop-v0` task.
+Each algorithm is independently trained 3 times (trials), and the shaded area represents the standard deviation (not the standard error) over the score of the three trials
+The curves are smoothed by taking an average over 30 episodes for visibility.
+
+**TODO: COMMENTS**
+
+Videos of trained agents during their last evaluation round:
+
+**TODO: VIDEOS**
+
+**TODO: GIFS**
+
+
+## MineRLNavigateDense-v0
+
+**TODO: PUT AN IMAGE**
+
+**TODO: COMMENTS**
+
+Videos of trained agents during their last evaluation round:
+
+**TODO: VIDEOS**
+
+**TODO: GIFS**
+
+
+## MineRLNavigate-v0
+
+**TODO: PUT AN IMAGE**
+
+**TODO: COMMENTS**
+
+Videos of trained agents during their last evaluation round:
+
+**TODO: VIDEOS**
+
+**TODO: GIFS**
+
+
+## MineRLObtainDiamond-v0
+
+BC/GAIL does not solve `MineRLObtainDiamond-v0`, either.
