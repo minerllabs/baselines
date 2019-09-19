@@ -23,19 +23,19 @@ See [MineRL installation](https://github.com/minerllabs/minerl#installation) and
 
 # Getting started
 
-1. Dataset download
-  - In order to run Behavoral Cloning and GAIL agents, you need to download expert dataset into an appropriate place (by default, `baselines/expert_dataset`).
-1. Training
-  - [baselines/dddqn.sh]
-      - Double Dueling DQN (DDDQN), with implementation and hyperparameters as described in the [proposal paper](https://arxiv.org/abs/1904.10079) (code: [here](https://github.com/minerllabs/minerl/blob/master/tests/excluded/navigate_dqn_test.py) and [here](https://github.com/minerllabs/minerl/blob/master/tests/excluded/treechop_dqn_test.py)).
-  - [baselines/rainbow.sh]
-      - Rainbow
-  - [baselines/ppo.sh]
-      - PPO
-  - [baselines/behavoral_cloning.sh]
-      - Behavoral Cloning (BC)
-  - [baselines/gail.sh]
-      - GAIL
+### Dataset download
+- In order to run Behavoral Cloning and GAIL agents, you need to download expert dataset into an appropriate place (by default, `baselines/expert_dataset`).
+### Training
+- [baselines/dddqn.sh]
+    - Double Dueling DQN (DDDQN), with implementation and hyperparameters as described in the [proposal paper](https://arxiv.org/abs/1904.10079) (code: [here](https://github.com/minerllabs/minerl/blob/master/tests/excluded/navigate_dqn_test.py) and [here](https://github.com/minerllabs/minerl/blob/master/tests/excluded/treechop_dqn_test.py)).
+- [baselines/rainbow.sh]
+    - Rainbow
+- [baselines/ppo.sh]
+    - PPO
+- [baselines/behavoral_cloning.sh]
+    - Behavoral Cloning (BC)
+- [baselines/gail.sh]
+    - GAIL
 
 
 # Overview of experimental results of DDDQN/Rainbow/PPO/BC/GAIL
@@ -49,8 +49,8 @@ See [MineRL installation](https://github.com/minerllabs/minerl#installation) and
 | (**ours**) DDDQN   | 9.68 +- 5.28       | 5.00 +- 21.79    | 57.84 +- 50.74     |
 | (**ours**) Rainbow | **60.39 +- 19.88** | 9.00 +- 28.62    | 66.48 +- 38.73     |
 | (**ours**) PPO     | 38.44 +- 19.04     | 6.00 +- 23.75    | 80.84 +- 51.29     |
-| (**ours**) BC      | abc +- def         | abc +- def       | abc +- def         |
-| (**ours**) GAIL    | abc +- def         | abc +- def       | abc +- def         |
+| (**ours**) BC      | 7.93 +- 3.27       | 45.00 +- 50.0    | 77.22 +- 60.78     |
+| (**ours**) GAIL    | 25.26 +- 6.38      | 28.00 +- 45.13   | 66.92 +- 42.59     |
 | (paper) Human      | 64.00 +- 0.00      | 100.00 +- 0.00   | 164.00 +- 0.00     |
 | (paper) Random     | 3.81 +- 0.57       | 1.00 +- 1.95     | -4.37 +- 5.10      |
 
@@ -272,7 +272,7 @@ The exact hyperparameters used for each algorithm can be found from the links in
 
 ## MineRLTreechop-v0
 
-**TODO: PUT AN IMAGE**
+![release_bc_gail_MineRLTreechop-v0](static/release_bc_gail/MineRLTreechop-v0.png)
 
 The figure above shows the performance of the algorithms during the training phase on the `MineRLTreechop-v0` task.
 Each algorithm is independently trained 3 times (trials), and the shaded area represents the standard deviation (not the standard error) over the score of the three trials
@@ -289,7 +289,7 @@ Videos of trained agents during their last evaluation round:
 
 ## MineRLNavigateDense-v0
 
-**TODO: PUT AN IMAGE**
+![release_bc_gail_MineRLNavigateDense-v0](static/release_bc_gail/MineRLNavigateDense-v0.png)
 
 **TODO: COMMENTS**
 
@@ -302,7 +302,7 @@ Videos of trained agents during their last evaluation round:
 
 ## MineRLNavigate-v0
 
-**TODO: PUT AN IMAGE**
+![release_bc_gail_MineRLNavigate-v0](static/release_bc_gail/MineRLNavigate-v0.png)
 
 **TODO: COMMENTS**
 
