@@ -145,7 +145,7 @@ class FrameStack(gym.Wrapper):
 
     def step(self, action):
         ob, reward, done, info = self.env.step(action)
-        self.frames.append(ob)
+        self.observations.append(ob)
         return self._get_ob(), reward, done, info
 
     def _get_ob(self):
@@ -156,7 +156,7 @@ class FrameStack(gym.Wrapper):
             return (LazyFrames(list(frames), stack_axis=self.stack_axis),
                     LazyFrames(list(inventory), stack_axis=0))
         else:
-            return LazyFrames(list(self.frames), stack_axis=self.stack_axis)
+            return LazyFrames(list(self.observations), stack_axis=self.stack_axis)
 
 
 class ObtainPoVWrapper(gym.ObservationWrapper):
