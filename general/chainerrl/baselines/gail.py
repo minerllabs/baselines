@@ -491,7 +491,6 @@ def _main(args):
         return env
 
     core_env = gym.make(args.env)
-    core_env.seed(int(args.seed))
     env = wrap_env(core_env, test=False)
     # eval_env = gym.make(args.env)  # Can't create multiple MineRL envs
     eval_env = wrap_env(core_env, test=True)
@@ -743,6 +742,25 @@ def _main(args):
                     variance_setter)
 
                 step_hooks.append(variance_decay_hook)
+
+            # set entropy hook
+            def policy_entropy_setter(env, agent, value):
+                agent.policy.entropy_coef = value
+
+            policy_entropy_decay_hook = experiments.LinearInterpolationHook(
+                steps, args.policy_entropy_coef, 0,
+                policy_entropy_setter)
+
+            step_hooks.append(policy_entropy_decay_hook)
+
+            def discriminator_entropy_setter(env, agent, value):
+                agent.discriminator.entropy_coef = value
+
+            discriminator_entropy_decay_hook = experiments.LinearInterpolationHook(
+                steps, args.discriminator_entropy_coef, 0,
+                discriminator_entropy_setter)
+
+            step_hooks.append(discriminator_entropy_decay_hook)
 
             def policy_lr_setter(env, agent, value):
                 agent.policy.optimizer.alpha = value

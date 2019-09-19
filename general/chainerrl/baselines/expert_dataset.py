@@ -117,9 +117,8 @@ class ExpertDataset:
             obs = self.observation_converter(orig_obs)
             action = self.action_converter(orig_action)
             next_obs = self.observation_converter(orig_next_obs)
-            done = orig_done[1:]
             obs, action, reward, next_obs, done = _skip_frames(
-                obs, action, orig_reward, next_obs, done, self.frameskip)
+                obs, action, orig_reward, next_obs, orig_done, self.frameskip)
 
             if self.framestack > 1:
                 obs, next_obs = _stack_frames(obs, next_obs, self.framestack)

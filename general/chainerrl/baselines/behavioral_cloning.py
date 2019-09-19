@@ -319,7 +319,6 @@ def _main(args):
         return env
 
     core_env = gym.make(args.env)
-    core_env.seed(int(args.seed))
     env = wrap_env(core_env, test=False)
     # eval_env = gym.make(args.env)  # Can't create multiple MineRL envs
     # eval_env = wrap_env(eval_env, test=True)
