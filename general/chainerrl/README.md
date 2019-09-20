@@ -281,10 +281,18 @@ The curves are smoothed by taking an average over 30 episodes for visibility.
 **TODO: COMMENTS**
 
 Videos of trained agents during their last evaluation round:
+- [Behavioral Cloning trial 1 (reward 5.0)](static/release_bc_gail/BehavioralCloningTreechop1.mp4)
+- [Behavioral Cloning trial 2 (reward 6.0)](static/release_bc_gail/BehavioralCloningTreechop2.mp4)
+- [Behavioral Cloning trial 3 (reward 11.0)](static/release_bc_gail/BehavioralCloningTreechop3.mp4)
+- [GAIL trial 1 (reward 14.0)](static/release_bc_gail/GAILTreechop1.mp4)
+- [GAIL trial 2 (reward 11.0)](static/release_bc_gail/GAILTreechop2.mp4)
+- [GAIL trial 3 (reward 29.0)](static/release_bc_gail/GAILTreechop3.mp4)
 
-**TODO: VIDEOS**
+![BehavioralCloning trial 3 first 100 frames](static/release_bc_gail/BehavioralCloningTreechop3.gif)  
+Behavioral Cloning trial 3 first 100 frames
 
-**TODO: GIFS**
+![GAIL trial 3 first 100 frames](static/release_bc_gail/GAILTreechop3.gif)  
+GAIL trial 3 first 100 frames
 
 
 ## MineRLNavigateDense-v0
@@ -294,10 +302,18 @@ Videos of trained agents during their last evaluation round:
 **TODO: COMMENTS**
 
 Videos of trained agents during their last evaluation round:
+- (NA) Behavioral Cloning trial 1
+- (NA) Behavioral Cloning trial 2
+- (NA) Behavioral Cloning trial 3
+- [GAIL trial 1 (reward 9.8)](static/release_bc_gail/GAILNavigateDense1.mp4)
+- (NA) GAIL trial 2
+- [GAIL trial 3 (reward 54.2)](static/release_bc_gail/GAILNavigateDense3.mp4)
 
-**TODO: VIDEOS**
+(NA) Behavioral Cloning first 100 frames
 
-**TODO: GIFS**
+![GAIL trial 3 first 100 frames](static/release_bc_gail/GAILNavigateDense3.gif)  
+GAIL trial 3 first 100 frames
+
 
 
 ## MineRLNavigate-v0
@@ -307,10 +323,18 @@ Videos of trained agents during their last evaluation round:
 **TODO: COMMENTS**
 
 Videos of trained agents during their last evaluation round:
+- [Behavioral Cloning trial 1 (reward 0.0)](static/release_bc_gail/BehavioralCloningNavigate1.mp4)
+- [Behavioral Cloning trial 2 (reward 100.0)](static/release_bc_gail/BehavioralCloningNavigate2.mp4)
+- [Behavioral Cloning trial 3 (reward 100.0)](static/release_bc_gail/BehavioralCloningNavigate3.mp4)
+- [GAIL trial 1 (reward 0.0)](static/release_bc_gail/GAILNavigate1.mp4)
+- [GAIL trial 2 (reward 0.0)](static/release_bc_gail/GAILNavigate2.mp4)
+- (NA) GAIL trial 3
 
-**TODO: VIDEOS**
+![BehavioralCloning trial 2 first 100 frames](static/release_bc_gail/BehavioralCloningNavigate2.gif)  
+Behavioral Cloning trial 2 first 100 frames
 
-**TODO: GIFS**
+![GAIL trial 1 first 100 frames](static/release_bc_gail/GAILNavigate1.gif)  
+GAIL trial 1 first 100 frames
 
 
 ## MineRLObtainDiamond-v0
