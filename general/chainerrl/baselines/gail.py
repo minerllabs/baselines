@@ -14,7 +14,6 @@ import numpy as np
 
 import chainer
 from chainer import functions as F
-from chainer import links as L
 
 import chainerrl
 from chainerrl import experiments
@@ -29,8 +28,6 @@ from observation_wrappers import (
 from action_wrappers import (
     generate_discrete_converter, generate_continuous_converter,
     generate_multi_dimensional_softmax_converter)
-from distribution import MultiDimensionalSoftmaxDistribution
-from utils import ordinal_logit_function
 
 from env_wrappers import (
     SerialDiscreteActionWrapper, NormalizedContinuousActionWrapper,
@@ -38,295 +35,12 @@ from env_wrappers import (
     ObtainPoVWrapper, FrameSkip, MoveAxisWrapper,
     MultiDimensionalSoftmaxActionWrapper)
 
+from policies import (
+    ActorVFunc, ActorPPONet, ActorTRPONetForDiscrete,
+    ActorTRPONetForContinuous, ActorTRPONetForMultiDimensionalSoftmax,
+    DiscNet)
+
 logger = getLogger(__name__)
-
-
-class ActorTRPONetForDiscrete(chainer.Chain):
-    def __init__(self, n_actions, n_input_channels=4, activation=F.relu,
-                 bias=0.1, hiddens=None, use_bn=False):
-        self.n_input_channels = n_input_channels
-        self.activation = activation
-        self.hiddens = [512] if hiddens is None else hiddens
-        self.use_bn = use_bn
-
-        super(ActorTRPONetForDiscrete, self).__init__()
-        with self.init_scope():
-            self.conv_layers = chainer.ChainList(
-                L.Convolution2D(n_input_channels, 32, 8, stride=4,
-                                initial_bias=bias),
-                L.Convolution2D(32, 64, 4, stride=2, initial_bias=bias),
-                L.Convolution2D(64, 64, 3, stride=1, initial_bias=bias))
-            if self.use_bn:
-                self.bn_layers = chainer.ChainList(
-                    L.BatchNormalization(32),
-                    L.BatchNormalization(64),
-                    L.BatchNormalization(64))
-                self.a_stream = chainerrl.links.mlp_bn.MLPBN(None, n_actions, self.hiddens,
-                                                             normalize_input=False)
-            else:
-                self.a_stream = chainerrl.links.mlp.MLP(None, n_actions, self.hiddens)
-
-    def __call__(self, s):
-        h = s
-        if self.use_bn:
-            for l, b in zip(self.conv_layers, self.bn_layers):
-                h = self.activation(b(l(h)))
-        else:
-            for l in self.conv_layers:
-                h = self.activation(l(h))
-        out = self.a_stream(h)
-        return chainerrl.distribution.SoftmaxDistribution(out)
-
-
-class ActorTRPONetForContinuous(chainer.Chain):
-    def __init__(self, n_actions, n_input_channels=4, activation=F.relu,
-                 bias=0.1, var_param_init=0,  # var_func=F.softplus,
-                 hiddens=None, use_bn=False):
-        self.n_input_channels = n_input_channels
-        self.activation = activation
-        self.hiddens = [512] if hiddens is None else hiddens
-        # self.var_func = var_func
-        self.use_bn = use_bn
-
-        super(ActorTRPONetForContinuous, self).__init__()
-        with self.init_scope():
-            self.conv_layers = chainer.ChainList(
-                L.Convolution2D(n_input_channels, 32, 8, stride=4,
-                                initial_bias=bias),
-                L.Convolution2D(32, 64, 4, stride=2, initial_bias=bias),
-                L.Convolution2D(64, 64, 3, stride=1, initial_bias=bias))
-            if self.use_bn:
-                self.bn_layers = chainer.ChainList(
-                    L.BatchNormalization(32),
-                    L.BatchNormalization(64),
-                    L.BatchNormalization(64))
-                self.a_stream = chainerrl.links.mlp_bn.MLPBN(None, n_actions, self.hiddens,
-                                                             normalize_input=False)
-            else:
-                self.a_stream = chainerrl.links.mlp.MLP(None, n_actions, self.hiddens)
-            self.var_param = chainer.Parameter(initializer=var_param_init,
-                                               shape=(1,))
-            # self.var_param = chainer.Parameter(
-            #     initializer=var_param_init, shape=(n_actions,))  # independent
-
-    def __call__(self, s):
-        h = s
-        if self.use_bn:
-            for l, b in zip(self.conv_layers, self.bn_layers):
-                h = self.activation(b(l(h)))
-        else:
-            for l in self.conv_layers:
-                h = self.activation(l(h))
-        mean = F.tanh(self.a_stream(h))
-        var = F.broadcast_to(self.var_param, mean.shape)
-        # var = F.broadcast_to(self.var_func(self.var_param), mean.shape)
-        return chainerrl.distribution.GaussianDistribution(mean, var)
-
-
-class ActorTRPONetForMultiDimensionalSoftmax(chainer.Chain):
-    def __init__(self, action_space, n_input_channels=4, activation=F.relu,
-                 bias=0.1, var_param_init=0, hiddens=None, use_bn=False,
-                 use_ordinal_logit=False):
-        n_actions = action_space.high + 1
-        self.n_input_channels = n_input_channels
-        self.activation = activation
-        self.hiddens = [512] if hiddens is None else hiddens
-        self.use_bn = use_bn
-        self.use_ordinal_logit = use_ordinal_logit
-
-        super(ActorTRPONetForMultiDimensionalSoftmax, self).__init__()
-        with self.init_scope():
-            self.conv_layers = chainer.ChainList(
-                L.Convolution2D(n_input_channels, 32, 8, stride=4,
-                                initial_bias=bias),
-                L.Convolution2D(32, 64, 4, stride=2, initial_bias=bias),
-                L.Convolution2D(64, 64, 3, stride=1, initial_bias=bias))
-            if self.use_bn:
-                self.bn_layers = chainer.ChainList(
-                    L.BatchNormalization(32),
-                    L.BatchNormalization(64),
-                    L.BatchNormalization(64))
-                self.hidden_layers = chainer.ChainList(
-                    *[chainerrl.links.mlp_bn.LinearBN(None, hidden) for hidden in self.hiddens])
-                self.action_layers = chainer.ChainList(
-                    *[L.Linear(None, n) for n in n_actions])
-            else:
-                self.hidden_layers = chainer.ChainList(
-                    *[L.Linear(None, hidden) for hidden in self.hiddens])
-                self.action_layers = chainer.ChainList(
-                    *[L.Linear(None, n) for n in n_actions])
-
-    def __call__(self, s):
-        h = s
-        if self.use_bn:
-            for l, b in zip(self.conv_layers, self.bn_layers):
-                h = self.activation(b(l(h)))
-        else:
-            for l in self.conv_layers:
-                h = self.activation(l(h))
-        for l in self.hidden_layers:
-            h = self.activation(l(h))
-        out = [layer(h) for layer in self.action_layers]
-        if self.use_ordinal_logit:
-            out = [ordinal_logit_function(v) for v in out]
-        return MultiDimensionalSoftmaxDistribution(out)
-
-
-class SeparatedActorTRPONetForMultiDimensionalSoftmax(chainer.Chain):
-    def __init__(self, action_space, n_input_channels=4, activation=F.relu,
-                 bias=0.1, var_param_init=0, hiddens=None, use_bn=False,
-                 use_ordinal_logit=False):
-        self.n_actions = action_space.high + 1
-        self.n_input_channels = n_input_channels
-        self.activation = activation
-        self.hiddens = [512] if hiddens is None else hiddens
-        self.use_bn = use_bn
-        self.use_ordinal_logit = use_ordinal_logit
-
-        super(SeparatedActorTRPONetForMultiDimensionalSoftmax, self).__init__()
-        with self.init_scope():
-            self.conv_layers = chainer.ChainList(
-                *[chainer.ChainList(
-                    L.Convolution2D(n_input_channels, 32, 8, stride=4,
-                                    initial_bias=bias),
-                    L.Convolution2D(32, 64, 4, stride=2, initial_bias=bias),
-                    L.Convolution2D(64, 64, 3, stride=1, initial_bias=bias))
-                for n in self.n_actions])
-            if self.use_bn:
-                self.bn_layers = [chainer.ChainList(
-                    L.BatchNormalization(32),
-                    L.BatchNormalization(64),
-                    L.BatchNormalization(64))
-                    for n in self.n_actions]
-                self.hidden_layers = [chainer.ChainList(
-                    *[chainerrl.links.mlp_bn.LinearBN(None, hidden) for hidden in self.hiddens])
-                    for n in self.n_actions]
-                self.action_layers = chainer.ChainList(
-                    *[L.Linear(None, n) for n in self.n_actions])
-            else:
-                self.hidden_layers = chainer.ChainList(
-                    *[chainer.ChainList(
-                        *[L.Linear(None, hidden) for hidden in self.hiddens])
-                    for n in self.n_actions])
-                self.action_layers = chainer.ChainList(
-                    *[L.Linear(None, n) for n in self.n_actions])
-
-    def __call__(self, s):
-        out = []
-        for i in range(len(self.n_actions)):
-            h = s
-            if self.use_bn:
-                for l, b in zip(self.conv_layers[i], self.bn_layers[i]):
-                    h = self.activation(b(l(h)))
-            else:
-                for l in self.conv_layers[i]:
-                    h = self.activation(l(h))
-            for l in self.hidden_layers[i]:
-                h = self.activation(l(h))
-            out.append(self.action_layers[i](h))
-        if self.use_ordinal_logit:
-            out = [ordinal_logit_function(v) for v in out]
-        return MultiDimensionalSoftmaxDistribution(out)
-
-
-class ActorVFunc(chainer.Chain):
-    def __init__(self, n_input_channels=4, activation=F.relu,
-                 bias=0.1, hiddens=None, use_bn=False):
-        self.n_input_channels = n_input_channels
-        self.activation = activation
-        self.hiddens = [512] if hiddens is None else hiddens
-        self.use_bn = use_bn
-
-        super(ActorVFunc, self).__init__()
-        with self.init_scope():
-            self.conv_layers = chainer.ChainList(
-                L.Convolution2D(n_input_channels, 32, 8, stride=4,
-                                initial_bias=bias),
-                L.Convolution2D(32, 64, 4, stride=2, initial_bias=bias),
-                L.Convolution2D(64, 64, 3, stride=1, initial_bias=bias))
-            if self.use_bn:
-                self.bn_layers = chainer.ChainList(
-                    L.BatchNormalization(32),
-                    L.BatchNormalization(64),
-                    L.BatchNormalization(64))
-                self.a_stream = chainerrl.links.mlp_bn.MLPBN(None, 1, self.hiddens,
-                                                             normalize_input=False)
-            else:
-                self.a_stream = chainerrl.links.mlp.MLP(None, 1, self.hiddens)
-
-    def __call__(self, s):
-        h = s
-        if self.use_bn:
-            for l, b in zip(self.conv_layers, self.bn_layers):
-                h = self.activation(b(l(h)))
-        else:
-            for l in self.conv_layers:
-                h = self.activation(l(h))
-        return self.a_stream(h)
-
-
-class ActorPPONet(chainer.Chain, chainerrl.agents.a3c.A3CModel):
-    def __init__(self, policy_model, vf_model):
-        super(ActorPPONet, self).__init__()
-        with self.init_scope():
-            self.pi = policy_model
-            self.v = vf_model
-
-    def pi_and_v(self, state):
-        return self.pi(state), self.v(state)
-
-
-class DiscNet(chainer.Chain):
-    """Network for discriminator
-    Input: images, action
-    Output: np.array(shape=(1,))
-    """
-    def __init__(self, n_input_channels=4, activation=F.relu,
-                 bias=0.1, use_dropout=False, use_bn=False,
-                 action_wrapper=None, hiddens=None):
-        self.n_input_channels = n_input_channels
-        self.activation = activation
-        if use_dropout:
-            self.activation = lambda x: F.dropout(activation(x))
-        self.use_bn = use_bn
-        self.hiddens = [512, 512] if hiddens is None else hiddens
-        assert action_wrapper in ['discrete', 'continuous',
-                                  'multi-dimensional-softmax']
-        self.action_wrapper = action_wrapper
-
-        super(DiscNet, self).__init__()
-        with self.init_scope():
-            self.conv_layers = chainer.ChainList(
-                L.Convolution2D(n_input_channels, 32, 8, stride=4,
-                                initial_bias=bias),
-                L.Convolution2D(32, 64, 4, stride=2, initial_bias=bias),
-                L.Convolution2D(64, 64, 3, stride=1, initial_bias=bias))
-            if self.use_bn:
-                self.bn_layers = chainer.ChainList(
-                    L.BatchNormalization(32),
-                    L.BatchNormalization(64),
-                    L.BatchNormalization(64))
-                self.a_stream = chainerrl.links.mlp_bn.MLPBN(
-                    None, 1, self.hiddens, nonlinearity=self.activation,
-                    normalize_input=False)
-            else:
-                self.a_stream = chainerrl.links.mlp.MLP(
-                    None, 1, self.hiddens, nonlinearity=self.activation)
-
-    def __call__(self, s, a):
-        num_data = s.shape[0]
-        h = s
-        if self.use_bn:
-            for l, b in zip(self.conv_layers, self.bn_layers):
-                h = self.activation(b(l(h)))
-        else:
-            for l in self.conv_layers:
-                h = self.activation(l(h))
-        # flatten
-        h = F.reshape(h, (num_data, -1))
-        if self.action_wrapper == 'discrete':
-            a = a.reshape(-1, 1)
-        return self.a_stream(F.concat((h, a), axis=1))
 
 
 def parse_action_wrapper(action_wrapper, env, always_keys, reverse_keys,
@@ -387,11 +101,6 @@ def main():
     parser.add_argument('--exclude-noop', action='store_true', default=False, help='The "noop" will be excluded from discrete action list.')
     parser.add_argument('--action-wrapper', type=str, default='discrete',
                         choices=['discrete', 'continuous', 'multi-dimensional-softmax'])
-    parser.add_argument('--use-dropout', action='store_true')
-    parser.add_argument('--use-ordinal-logit', action='store_true')
-    parser.add_argument('--use-noisy-label', action='store_true',
-                        help='Add noise on loss of discriminator')
-    parser.add_argument('--use-batch-normalization', action='store_true')
     parser.add_argument('--max-camera-range', type=float, default=10.,
                         help='Maximum value of camera angle change in one frame')
     parser.add_argument('--num-camera-discretize', type=int, default=7,
@@ -413,14 +122,12 @@ def main():
                         default=3072,
                         help='Interval steps of Discriminator iterations.')
     parser.add_argument('--discriminator-minibatch-size', type=int, default=3072)
-    parser.add_argument('--use-hook', action='store_true')
     parser.add_argument('--policy-entropy-coef', type=float, default=0)
     parser.add_argument('--initial-var-param', type=float, default=0.5)
     parser.add_argument('--discriminator-entropy-coef', type=float,
                         default=1e-3)
     parser.add_argument('--original-reward-weight', type=float, default=0.0,
                         help='define the weight of original reward with discriminator\'s value.')
-    parser.add_argument('--separate-multiple-actions', action='store_true')
     parser.add_argument('--pretrain', action='store_true')
 
     args = parser.parse_args()
@@ -454,7 +161,7 @@ def _main(args):
 
     # Set different random seeds for train and test envs.
     train_seed = args.seed  # noqa: never used in this script
-    # test_seed = 2 ** 31 - 1 - args.seed
+    test_seed = 2 ** 31 - 1 - args.seed
 
     def wrap_env(env, test):
         # wrap env: observation...
@@ -487,8 +194,8 @@ def _main(args):
             num_camera_discretize=args.num_camera_discretize,
             max_camera_range=args.max_camera_range)
 
-        # env_seed = test_seed if test else train_seed
-        # env.seed(int(env_seed))  # TODO: not supported yet
+        env_seed = test_seed if test else train_seed
+        env.seed(int(env_seed))
         return env
 
     core_env = gym.make(args.env)
@@ -527,33 +234,22 @@ def _main(args):
         n_actions = env.action_space.n
         policy = ActorTRPONetForDiscrete(
             n_actions, n_input_channels=n_input_channels,
-            activation=activation_func,
-            use_bn=args.use_batch_normalization)
+            activation=activation_func)
     elif args.action_wrapper == 'continuous':
         n_actions = env.action_space.low.shape[0]
         policy = ActorTRPONetForContinuous(
             n_actions, n_input_channels=n_input_channels,
             activation=activation_func,
-            var_param_init=args.initial_var_param,
-            use_bn=args.use_batch_normalization)
+            var_param_init=args.initial_var_param)
     elif args.action_wrapper == 'multi-dimensional-softmax':
-        if args.separate_multiple_actions:
-            policy = SeparatedActorTRPONetForMultiDimensionalSoftmax(
-                env.action_space, n_input_channels=n_input_channels,
-                activation=activation_func,
-                var_param_init=args.initial_var_param, use_bn=args.use_batch_normalization,
-                use_ordinal_logit=args.use_ordinal_logit)
-        else:
-            policy = ActorTRPONetForMultiDimensionalSoftmax(
-                env.action_space, n_input_channels=n_input_channels,
-                activation=activation_func,
-                var_param_init=args.initial_var_param, use_bn=args.use_batch_normalization,
-                use_ordinal_logit=args.use_ordinal_logit)
+        policy = ActorTRPONetForMultiDimensionalSoftmax(
+            env.action_space, n_input_channels=n_input_channels,
+            activation=activation_func,
+            var_param_init=args.initial_var_param)
 
     # Use a value function to reduce variance
     vf = ActorVFunc(n_input_channels=n_input_channels,
-                    activation=activation_func,
-                    use_bn=args.use_batch_normalization)
+                    activation=activation_func)
 
     # Draw the computational graph and save it in the output directory.
     sample_obs = env.observation_space.sample()
@@ -617,7 +313,7 @@ def _main(args):
             logger.debug('Action histogram:',
                          np.histogram(all_action, bins=n_actions)[0])
 
-        num_train_data = experts.size * 7 // 10
+        num_train_data = int(experts.size * args.training_dataset_ratio)
         train_obs = all_obs[:num_train_data]
         train_acs = all_action[:num_train_data]
         validate_obs = all_obs[num_train_data:]
@@ -675,10 +371,8 @@ def _main(args):
     obs_normalizer_disc = chainerrl.links.EmpiricalNormalization(
         (n_input_channels, 64, 64), clip_threshold=5)
     disc_model = DiscNet(n_input_channels=n_input_channels,
-                         use_dropout=args.use_dropout,
                          activation=activation_func,
-                         action_wrapper=args.action_wrapper,
-                         use_bn=args.use_batch_normalization)
+                         action_wrapper=args.action_wrapper)
 
     # Draw the computational graph and save it in the output directory.
     sample_obs = env.observation_space.sample()
@@ -693,8 +387,7 @@ def _main(args):
         disc_model, disc_opt, obs_normalizer=obs_normalizer_disc,
         update_interval=args.discriminator_update_interval,
         minibatch_size=args.discriminator_minibatch_size,
-        entropy_coef=args.discriminator_entropy_coef,
-        noisy_label=args.use_noisy_label, gpu=args.gpu)
+        entropy_coef=args.discriminator_entropy_coef, gpu=args.gpu)
 
     # ================ Set up GAIL ================
     agent = GAIL(actor, discriminator, experts, args.original_reward_weight)
@@ -710,63 +403,6 @@ def _main(args):
         logger.info('n_runs: {} mean: {} median: {} stdev {}'.format(
             args.eval_n_runs, eval_stats['mean'], eval_stats['median'], eval_stats['stdev']))
     else:
-        step_hooks = []
-        if args.use_hook:
-            if args.action_wrapper == 'continuous':
-                # set variance hook
-                xp = agent.discriminator.model.xp
-                if args.policy == 'trpo':
-                    def variance_setter(env, agent, value):
-                        agent.policy.model.var_param.array = xp.reshape(
-                            xp.array(value, dtype=xp.float32),
-                            (1, ))
-                elif args.policy == 'ppo':
-                    def variance_setter(env, agent, value):
-                        agent.policy.model.pi.var_param.array = xp.reshape(
-                            xp.array(value, dtype=xp.float32),
-                            (1, ))
-
-                variance_decay_hook = experiments.LinearInterpolationHook(
-                    steps, args.initial_var_param, 1e-2,
-                    variance_setter)
-
-                step_hooks.append(variance_decay_hook)
-
-            # set entropy hook
-            def policy_entropy_setter(env, agent, value):
-                agent.policy.entropy_coef = value
-
-            policy_entropy_decay_hook = experiments.LinearInterpolationHook(
-                steps, args.policy_entropy_coef, 0,
-                policy_entropy_setter)
-
-            step_hooks.append(policy_entropy_decay_hook)
-
-            def discriminator_entropy_setter(env, agent, value):
-                agent.discriminator.entropy_coef = value
-
-            discriminator_entropy_decay_hook = experiments.LinearInterpolationHook(
-                steps, args.discriminator_entropy_coef, 0,
-                discriminator_entropy_setter)
-
-            step_hooks.append(discriminator_entropy_decay_hook)
-
-            def policy_lr_setter(env, agent, value):
-                agent.policy.optimizer.alpha = value
-
-            policy_lr_decay_hook = experiments.LinearInterpolationHook(
-                steps, args.policy_lr, 0, policy_lr_setter)
-
-            step_hooks.append(policy_lr_decay_hook)
-
-            def discriminator_lr_setter(env, agent, value):
-                agent.discriminator.optimizer.alpha = value
-
-            discriminator_lr_decay_hook = experiments.LinearInterpolationHook(
-                steps, args.discriminator_lr, 0, discriminator_lr_setter)
-
-            step_hooks.append(discriminator_lr_decay_hook)
-
         experiments.train_agent_with_evaluation(
             agent=agent, env=env, steps=steps,
             eval_n_steps=None,
@@ -775,7 +411,7 @@ def _main(args):
             outdir=args.outdir,
             save_best_so_far_agent=True,
             eval_env=eval_env,
-            step_hooks=step_hooks,
+            step_hooks=[],
         )
 
     env.close()

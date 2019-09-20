@@ -31,7 +31,6 @@ from action_wrappers import (
     generate_multi_dimensional_softmax_converter)
 from agents.behavioral_cloning import BehavioralCloning
 from distribution import MultiDimensionalSoftmaxDistribution
-from utils import ordinal_logit_function
 
 from env_wrappers import (
     SerialDiscreteActionWrapper, NormalizedContinuousActionWrapper,
@@ -64,12 +63,11 @@ class Net(chainer.Chain):
     Output: np.array(shape=(n_actions,))
     """
     def __init__(self, n_actions, n_input_channels=4, activation=F.relu, bias=0.1, hiddens=None,
-                 action_wrapper=None, use_bn=False):
+                 action_wrapper=None):
         self.n_actions = n_actions
         self.n_input_channels = n_input_channels
         self.activation = activation
         self.hiddens = [512] if hiddens is None else hiddens
-        self.use_bn = use_bn
         assert action_wrapper in ['discrete', 'continuous']
         self.action_wrapper = action_wrapper
 
@@ -80,24 +78,12 @@ class Net(chainer.Chain):
                                 initial_bias=bias),
                 L.Convolution2D(32, 64, 4, stride=2, initial_bias=bias),
                 L.Convolution2D(64, 64, 3, stride=1, initial_bias=bias))
-            if self.use_bn:
-                self.bn_layers = chainer.ChainList(
-                    L.BatchNormalization(32),
-                    L.BatchNormalization(64),
-                    L.BatchNormalization(64))
-                self.a_stream = chainerrl.links.mlp_bn.MLPBN(None, n_actions, self.hiddens,
-                                                             normalize_input=False)
-            else:
-                self.a_stream = chainerrl.links.mlp.MLP(None, n_actions, self.hiddens)
+            self.a_stream = chainerrl.links.mlp.MLP(None, n_actions, self.hiddens)
 
     def get_raw_value(self, x):
         h = np.array(x)
-        if self.use_bn:
-            for l, b in zip(self.conv_layers, self.bn_layers):
-                h = self.activation(b(l(h)))
-        else:
-            for l in self.conv_layers:
-                h = self.activation(l(h))
+        for l in self.conv_layers:
+            h = self.activation(l(h))
         out = self.a_stream(h)
         if self.action_wrapper == 'discrete':
             return out
@@ -118,14 +104,11 @@ class NetForMultiDimensionalSoftmax(chainer.Chain):
     Output: a list of np.arrays. Each element represents an action for each action type.
     """
     def __init__(self, action_space, n_input_channels=4,
-                 activation=F.relu, bias=0.1, hiddens=None,
-                 use_bn=False, use_ordinal_logit=False):
+                 activation=F.relu, bias=0.1, hiddens=None):
         n_actions = action_space.high + 1
         self.n_input_channels = n_input_channels
         self.activation = activation
         self.hiddens = [512] if hiddens is None else hiddens
-        self.use_bn = use_bn
-        self.use_ordinal_logit = use_ordinal_logit
 
         super(NetForMultiDimensionalSoftmax, self).__init__()
         with self.init_scope():
@@ -134,34 +117,18 @@ class NetForMultiDimensionalSoftmax(chainer.Chain):
                                 initial_bias=bias),
                 L.Convolution2D(32, 64, 4, stride=2, initial_bias=bias),
                 L.Convolution2D(64, 64, 3, stride=1, initial_bias=bias))
-            if self.use_bn:
-                self.bn_layers = chainer.ChainList(
-                    L.BatchNormalization(32),
-                    L.BatchNormalization(64),
-                    L.BatchNormalization(64))
-                self.hidden_layers = chainer.ChainList(
-                    *[chainerrl.links.mlp_bn.LinearBN(None, hidden) for hidden in self.hiddens])
-                self.action_layers = chainer.ChainList(
-                    *[L.Linear(None, n) for n in n_actions])
-            else:
-                self.hidden_layers = chainer.ChainList(
-                    *[L.Linear(None, hidden) for hidden in self.hiddens])
-                self.action_layers = chainer.ChainList(
-                    *[L.Linear(None, n) for n in n_actions])
+            self.hidden_layers = chainer.ChainList(
+                *[L.Linear(None, hidden) for hidden in self.hiddens])
+            self.action_layers = chainer.ChainList(
+                *[L.Linear(None, n) for n in n_actions])
 
     def get_raw_value(self, x):
         h = x
-        if self.use_bn:
-            for l, b in zip(self.conv_layers, self.bn_layers):
-                h = self.activation(b(l(h)))
-        else:
-            for l in self.conv_layers:
-                h = self.activation(l(h))
+        for l in self.conv_layers:
+            h = self.activation(l(h))
         for l in self.hidden_layers:
             h = self.activation(l(h))
         out = [layer(h) for layer in self.action_layers]
-        if self.use_ordinal_logit:
-            out = [ordinal_logit_function(v) for v in out]
         return out
 
     def __call__(self, x):
@@ -230,8 +197,6 @@ def main():
                         choices=['sigmoid', 'tanh', 'relu', 'leaky-relu'])
     parser.add_argument('--prioritized-elements', type=str, nargs='+', default=None,
                         help='define priority of each element on discrete setting')
-    parser.add_argument('--use-batch-normalization', action='store_true')
-    parser.add_argument('--use-ordinal-logit', action='store_true')
     # parser.add_argument('--write-video', type=str, default=None)
     parser.add_argument('--entropy-coef', type=float, default=0)
     parser.add_argument('--allow-pitch', action='store_true', default=False,
@@ -240,6 +205,8 @@ def main():
                         help='Maximum value of camera angle change in one frame')
     parser.add_argument('--num-camera-discretize', type=int, default=7,
                         help='Number of actions to discretize pitch/yaw respectively')
+    parser.add_argument('--training-dataset-ratio', type=float, default=0.7,
+                        help='ratio of training dataset on behavioral cloning between (0, 1)')
     args = parser.parse_args()
 
     args.outdir = chainerrl.experiments.prepare_output_dir(args, args.outdir)
@@ -271,7 +238,7 @@ def _main(args):
 
     # Set different random seeds for train and test envs.
     train_seed = args.seed  # noqa: never used in this script
-    # test_seed = 2 ** 31 - 1 - args.seed
+    test_seed = 2 ** 31 - 1 - args.seed
 
     def wrap_env(env, test):
         # wrap env: observation...
@@ -304,8 +271,8 @@ def _main(args):
             num_camera_discretize=args.num_camera_discretize,
             max_camera_range=args.max_camera_range)
 
-        # env_seed = test_seed if test else train_seed
-        # env.seed(int(env_seed))  # TODO: not supported yet
+        env_seed = test_seed if test else train_seed
+        env.seed(int(env_seed))  # TODO: not supported yet
         return env
 
     core_env = gym.make(args.env)
@@ -339,8 +306,7 @@ def _main(args):
     if args.action_wrapper == 'multi-dimensional-softmax':
         policy = NetForMultiDimensionalSoftmax(
             env.action_space, n_input_channels=n_input_channels,
-            activation=activation_func, use_bn=args.use_batch_normalization,
-            use_ordinal_logit=args.use_ordinal_logit)
+            activation=activation_func)
     else:
         if args.action_wrapper == 'discrete':
             n_actions = env.action_space.n
@@ -348,7 +314,6 @@ def _main(args):
             n_actions = env.action_space.low.shape[0]
         policy = Net(
             n_actions, n_input_channels=n_input_channels,
-            use_bn=args.use_batch_normalization,
             activation=activation_func,
             action_wrapper=args.action_wrapper)
 
@@ -357,9 +322,7 @@ def _main(args):
     sample_batch_obs = np.expand_dims(sample_obs, 0)
     chainerrl.misc.draw_computational_graph([policy(sample_batch_obs).params], os.path.join(args.outdir, 'model'))
 
-    # Use the Nature paper's hyperparameters
-    # opt = optimizers.RMSpropGraves(lr=args.lr, alpha=0.95, momentum=0.0, eps=1e-2)
-    opt = optimizers.Adam(alpha=args.lr)  # NOTE: mirrors DQN implementation in MineRL paper
+    opt = optimizers.Adam(alpha=args.lr)
 
     opt.setup(policy)
 
@@ -397,7 +360,6 @@ def _main(args):
             action_converter = generate_multi_dimensional_softmax_converter(
                 args.allow_pitch, args.max_camera_range, args.num_camera_discretize)
 
-
         experts = ExpertDataset(
             original_dataset=minerl.data.make(args.env, data_dir=args.expert),
             observation_converter=observation_converter,
@@ -421,7 +383,7 @@ def _main(args):
             logger.debug('Action histogram:',
                          np.histogram(all_action, bins=n_actions)[0])
 
-        num_train_data = experts.size * 7 // 10
+        num_train_data = int(experts.size * args.training_dataset_ratio)
         train_obs = all_obs[:num_train_data]
         train_acs = all_action[:num_train_data]
         validate_obs = all_obs[num_train_data:]

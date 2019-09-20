@@ -164,8 +164,8 @@ class UnifiedObservationWrapper(gym.ObservationWrapper):
 
         if 'compassAngle' in self.env.observation_space.spaces:
             compass_angle_space = self.env.observation_space.spaces['compassAngle']
-            low_dict['compassAngle'] = compassAngle.low
-            high_dict['compassAngle'] = compassAngle.high
+            low_dict['compassAngle'] = compass_angle_space.low
+            high_dict['compassAngle'] = compass_angle_space.high
 
         if 'inventory' in self.env.observation_space.spaces:
             inventory_space = self.env.observation_space.spaces['inventory']
@@ -704,7 +704,6 @@ class MultiDimensionalSoftmaxActionWrapper(gym.ActionWrapper):
         # get each discrete action
         self._actions = [self.noop]
         num_actions = []
-        action_dict = OrderedDict({})
         for key in self.noop:
             if self.num_camera_discretize % 2 == 0:
                 raise ValueError('Number of camera discretization must be odd.')

@@ -24,7 +24,7 @@ See [MineRL installation](https://github.com/minerllabs/minerl#installation) and
 # Getting started
 
 ### Dataset download
-- In order to run the Behavoral Cloning and GAIL agents, you need to download expert dataset into an appropriate place (by default, `baselines/expert_dataset`).
+- In order to run the Behavoral Cloning and GAIL agents, you need to download expert dataset into an appropriate location (by default, `baselines/expert_dataset`).
 ### Training
 - [baselines/dddqn.sh]
     - Double Dueling DQN (DDDQN), with implementation and hyperparameters as described in the [proposal paper](https://arxiv.org/abs/1904.10079) (code: [here](https://github.com/minerllabs/minerl/blob/master/tests/excluded/navigate_dqn_test.py) and [here](https://github.com/minerllabs/minerl/blob/master/tests/excluded/treechop_dqn_test.py)).

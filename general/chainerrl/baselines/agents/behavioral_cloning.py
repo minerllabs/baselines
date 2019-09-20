@@ -37,8 +37,7 @@ class BehavioralCloning(AttributeSavingMixin, Agent):
                  minibatch_size=128,
                  states_per_epoch=2048,
                  action_wrapper='discrete',
-                 entropy_coef=0.01,
-                 max_retry=100, gpu=None):
+                 entropy_coef=0.01, gpu=None):
         if gpu is not None and gpu >= 0:
             cuda.get_device_from_id(gpu).use()
             self.model.to_gpu(device=gpu)
@@ -50,7 +49,6 @@ class BehavioralCloning(AttributeSavingMixin, Agent):
         self.average_loss = 1e38
         self.action_wrapper = action_wrapper
         self.entropy_coef = entropy_coef
-        self.max_retry = max_retry
         self.xp = self.model.xp
 
     def act(self, obs):
@@ -83,7 +81,13 @@ class BehavioralCloning(AttributeSavingMixin, Agent):
         loss -= entropy * self.entropy_coef
         return loss
 
-    def train(self, train_obs, train_acs, _validate_obs, validate_acs):
+    def train(self, train_obs, train_acs, _validate_obs, validate_acs,
+              max_retry=100, minimum_update_delta=1e-8):
+        """
+        This function trains the model by training and validation dataset.
+        It updates the model by training dataset until it fails improving
+           the loss of validation dataset max_retry times in a row.
+        """
         current_loss = 1e38
         length = len(train_obs)
         num_retry = 0
@@ -104,12 +108,12 @@ class BehavioralCloning(AttributeSavingMixin, Agent):
             validate_loss = chainer.cuda.to_cpu(
                 self._loss(validate_obs, validate_acs).array)
             logger.debug('Validate_loss: {}'.format(validate_loss))
-            if validate_loss > current_loss - 1e-8:
+            if validate_loss > current_loss - minimum_update_delta:
                 num_retry += 1
             else:
                 num_retry = 0
                 current_loss = validate_loss
-            if num_retry == self.max_retry:
+            if num_retry == max_retry:
                 break
         self.average_loss = current_loss
 

@@ -1,4 +1,3 @@
-import numpy as np
 import chainer
 from chainerrl.distribution import Distribution, SoftmaxDistribution
 import chainer.functions as F

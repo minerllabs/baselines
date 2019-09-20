@@ -36,6 +36,6 @@ python3 gail.py \
 #   --policy ppo --frame-skip 8 --frame-stack 1 --num-camera-discretize 11 \
 #   --expert ./expert_dataset --action-wrapper multi-dimensional-softmax \
 #   --gamma 0.95 --gray-scale --policy-entropy-coef 0.01 \
-#   --discriminator-entropy-coef 0.1 --use-hook --policy-update-interval 2000 \
+#   --discriminator-entropy-coef 0.1 --policy-update-interval 2000 \
 #   --policy-minibatch-size 200 --original-reward-weight 10 \
 #   --discriminator-update-interval 6000 --discriminator-minibatch-size 600
