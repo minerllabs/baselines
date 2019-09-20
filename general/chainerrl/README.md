@@ -55,7 +55,7 @@ See [MineRL installation](https://github.com/minerllabs/minerl#installation) and
 | (paper) Random     | 3.81 +- 0.57       | 1.00 +- 1.95     | -4.37 +- 5.10      |
 
 Table 1: (for "paper") Results over the best 100 contiguous episodes. +- denotes standard deviation.  
-(for "ours") Results over the best 100 contiguous episodes among three trials. +- denotes standard deviation.  
+(for "ours") Results over the best 100 contiguous episodes among three trials (for GAIL in Navigate tasks, two trials instead). +- denotes standard deviation.
 We do not emphasize the best performance for Navigate since the standard deviation is very large.  
 See Table 1 of [proposal paper](https://arxiv.org/abs/1904.10079) for more information.  
 Note that our current implementation does not use trajectory data.
