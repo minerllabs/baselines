@@ -23,6 +23,14 @@ class Discriminator(AttributeSavingMixin):
     """ Discriminator for Generative Adversarial Imination Learning
     See https://arxiv.org/abs/1606.03476
     Args:
+        model (chainer.Chain): Model
+        optimizer (chainer.Optimizer): Optimizer to train model
+        obs_normalizer (chainerrl.links.EmpiricalNormalization or None):
+            If set to chainerrl.links.EmpiricalNormalization, it is used to
+            normalize observations based on the empirical mean and standard
+            deviation of observations. These statistics are updated after
+            computing advantages and target values and before updating the
+            policy and the value function.
         update_interval (int): Interval steps of discriminator iterations.
             Every after this amount of steps, this agent updates
             the discriminator using data from these steps and experts.
@@ -36,7 +44,11 @@ class Discriminator(AttributeSavingMixin):
             discriminator, only used for recording statistics
         entropy_coef (float): Weight coefficient of discriminator for entropy
             bonus [0, inf)
+        discriminator_value_offset (float): Constant added to discriminator's
+            output to avoid generating huge rewards.
         noisy_label (bool): Add a noise on true/fake on training
+        noisy_label_range (float): The range of perturbation on the noisy label
+            setting
         gpu (int): GPU device id if not None nor negative
     """
     saved_attributes = ('model', 'optimizer', 'obs_normalizer')
@@ -44,7 +56,8 @@ class Discriminator(AttributeSavingMixin):
     def __init__(self, model, optimizer, obs_normalizer=None,
                  update_interval=3072, minibatch_size=3072, epochs=1,
                  entropy_coef=1e-3, loss_decay=0.99, entropy_decay=0.99,
-                 noisy_label=False, gpu=None):
+                 discriminator_value_offset=1e-8, noisy_label=False,
+                 noisy_label_range=0.3, gpu=None):
         self.model = model
         self.optimizer = optimizer
         self.obs_normalizer = obs_normalizer
@@ -67,7 +80,9 @@ class Discriminator(AttributeSavingMixin):
         self.accuracy_gen = 0.
         self.accuracy_exp = 0.
         self.average_entropy = 0.
+        self.discriminator_value_offset = discriminator_value_offset
         self.noisy_label = noisy_label
+        self.noisy_label_range = noisy_label_range
         self._reset_trajectories()
 
     def get_reward(self, obs, action):
@@ -97,7 +112,9 @@ class Discriminator(AttributeSavingMixin):
         with chainer.using_config('train', False), chainer.no_backprop_mode():
             infer = self.model(batch_obs, batch_action)
             return chainer.cuda.to_cpu(
-                -F.log(1 - F.sigmoid(infer) + 1e-8).array)[:, 0]
+                -F.log(1
+                       - F.sigmoid(infer)
+                       + self.discriminator_value_offset).array)[:, 0]
 
     def get_batch_reward_and_train(self, batch_obs, batch_action,
                                    batch_expert_obs, batch_expert_action):
@@ -126,11 +143,14 @@ class Discriminator(AttributeSavingMixin):
         if self.noisy_label:
             n = fake_batch_obs.shape[0]
             fake_loss = -F.average(
-                F.log(F.absolute(1 - self.xp.random.rand(n) * 0.3
+                F.log(F.absolute(1 - (self.xp.random.rand(n)
+                                      * self.noisy_label_range)
                                  - F.sigmoid(infer_fake))
-                      + 1e-8))
+                      + self.discriminator_value_offset))
         else:
-            fake_loss = -F.average(F.log(1 - F.sigmoid(infer_fake) + 1e-8))
+            fake_loss = -F.average(F.log(1
+                                         - F.sigmoid(infer_fake)
+                                         + self.discriminator_value_offset))
 
         if self.obs_normalizer is not None:
             normalized_obs = self.obs_normalizer(true_batch_obs, update=True)
@@ -140,11 +160,13 @@ class Discriminator(AttributeSavingMixin):
         if self.noisy_label:
             n = true_batch_obs.shape[0]
             true_loss = -F.average(
-                F.log(F.absolute(self.xp.random.rand(n) * 0.3
+                F.log(F.absolute(1 - (self.xp.random.rand(n)
+                                      * self.noisy_label_range)
                                  - F.sigmoid(infer_true))
-                      + 1e-8))
+                      + self.discriminator_value_offset))
         else:
-            true_loss = -F.average(F.log(F.sigmoid(infer_true) + 1e-8))
+            true_loss = -F.average(F.log(F.sigmoid(infer_true)
+                                         + self.discriminator_value_offset))
 
         entropy = (self._get_entropy(infer_fake) / 2
                    + self._get_entropy(infer_true) / 2)
@@ -199,8 +221,11 @@ class Discriminator(AttributeSavingMixin):
         self.trajectories_true_action = []
 
     def _get_entropy(self, values):
-        return F.average((-values * F.log2(F.sigmoid(values) + 1e-8)
-                         - (1 - values) * F.log2(1 - F.sigmoid(values) + 1e-8)))  # NOQA
+        return F.average((-values * F.log2(F.sigmoid(values)
+                                           + self.discriminator_value_offset)
+                         - (1 - values) * F.log2(1
+                                                 - F.sigmoid(values)
+                                                 + self.discriminator_value_offset)))  # NOQA
 
     def get_statistics(self):
         return [

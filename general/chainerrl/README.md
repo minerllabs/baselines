@@ -24,7 +24,7 @@ See [MineRL installation](https://github.com/minerllabs/minerl#installation) and
 # Getting started
 
 ### Dataset download
-- In order to run Behavoral Cloning and GAIL agents, you need to download expert dataset into an appropriate place (by default, `baselines/expert_dataset`).
+- In order to run the Behavoral Cloning and GAIL agents, you need to download expert dataset into an appropriate place (by default, `baselines/expert_dataset`).
 ### Training
 - [baselines/dddqn.sh]
     - Double Dueling DQN (DDDQN), with implementation and hyperparameters as described in the [proposal paper](https://arxiv.org/abs/1904.10079) (code: [here](https://github.com/minerllabs/minerl/blob/master/tests/excluded/navigate_dqn_test.py) and [here](https://github.com/minerllabs/minerl/blob/master/tests/excluded/treechop_dqn_test.py)).
@@ -266,7 +266,7 @@ Resulting action spaces after shaped with prior knowledge are:
 
 # Experimental results of BC/GAIL
 
-The figures below show the *training* reward graphs for each of BC/GAIL with converting criteria of expert dataset.
+The figures below show the *training* reward graphs for both BC and GAIL along with the criteria used to process the expert dataset.
 
 The exact hyperparameters used for each algorithm can be found from the links in the "Getting Started" section and their corresponding Python scripts (`baselines/behavoral_cloning.py`, `baselines/gail.py`).
 
@@ -325,7 +325,7 @@ GAIL trial 3 first 100 frames
 
 ![release_bc_gail_MineRLNavigate-v0](static/release_bc_gail/MineRLNavigate-v0.png)
 
-BC and GAIL shows better performance than RL agents without expert dataset and [original paper](https://arxiv.org/abs/1904.10079)'s BC (4.23 +- 4.15).
+BC and GAIL show better performance than RL agents without expert dataset and [original paper](https://arxiv.org/abs/1904.10079)'s BC (4.23 +- 4.15).
 
 Videos of trained agents during their last evaluation round:
 - [Behavioral Cloning trial 1 (reward 0.0)](static/release_bc_gail/BehavioralCloningNavigate1.mp4)
@@ -344,7 +344,7 @@ GAIL trial 1 first 100 frames
 
 ## MineRLObtainDiamond-v0
 
-BC/GAIL does not solve `MineRLObtainDiamond-v0`, either.
+BC/GAIL aren't able to solve `MineRLObtainDiamond-v0`, either.
 
 ## Data conversion
 
@@ -366,12 +366,29 @@ In `discrete` and `multi-dimensional-softmax` settings, it utilize the following
 Both agents utilizes the following camera discretization.
 BC also converted overall action sets to a discrete action space.
 It is basically same as those of RL agents, except that it has more candidates of camera actions.
-Actions of experts are casted to only one of the discrete actions.
+(For more information, see the **Discretization to a discrete action space** section below.)
 
 #### Camera discretization
+
 Since ranges of yaw, pitch `[-180, 180]` are quite large especially for GAIL, we limited it to `[-10, 10]` respectively.
 Also, we converted this continuous range to equally spaced discrete actions.
+
 - In these experiments, we modified to 7 discrete actions. (i.e., `-10`, `-6.66`, `-3.33`, `0`, `3.33`, `6.66`, and `10`).
+
+This value is specified by `--num-camera-discretize`. **NOTE THAT THIS VALUE MUST BE AN ODD NUMBER.**
+
+#### Discretization to a discrete action space
+
+On the `discrete` setting, expert actions are converted to only one action.
+The converted action is selected based on a sequence of conditions, which compare the value of the corresponding element with certaion constant.
+If more than 1 conditions are satisfied. It selects an action based on the following order:
+
+- 'nearbyCraft', 'nearbySmelt', 'craft', 'equip', 'place', 'camera', 'forward', 'back', 'left', 'right', 'jump', 'sneak', 'sprint', 'attack'
+
+You can control the order of conditions by using the `--prioritized-elements` option.
+If one of conditions specified in `--prioritized-elements` is `True`, then it precedes the original priorities.
+Ties are broken by the order of `--prioritized-elements`.
+
 
 #### Pitch control
 

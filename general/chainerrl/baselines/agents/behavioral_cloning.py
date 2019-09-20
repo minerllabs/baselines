@@ -13,20 +13,22 @@ import chainer
 from chainer import cuda
 from chainer import functions as F
 
-from chainerrl.agent import AttributeSavingMixin, BatchAgent
+from chainerrl.agent import AttributeSavingMixin, Agent
 
 logger = getLogger(__name__)
 
 
-class BehavioralCloning(AttributeSavingMixin, BatchAgent):
+class BehavioralCloning(AttributeSavingMixin, Agent):
     """Behavioral Cloning
     Args:
-        model (A3CModel): Model
+        model (chainer.Chain): Model
         optimizer (chainer.Optimizer): Optimizer to train model
         experts (ExpertDataset): Expert trajectory
         minibatch_size (int): Minibatch size
         states_per_epoch (int): Number of states to use in one training
             iteration
+        action_wrapper (str): Name of action wrapper
+        entropy_coef (float): Weight coefficient for entropy bonus [0, inf)
         gpu (int): GPU device id if not None nor negative
     """
     saved_attributes = ('model', 'optimizer')
@@ -65,19 +67,6 @@ class BehavioralCloning(AttributeSavingMixin, BatchAgent):
 
     def stop_episode(self):
         pass
-
-    def batch_act(self, batch_obs):
-        raise NotImplementedError
-
-    def batch_act_and_train(self, batch_obs):
-        raise NotImplementedError
-
-    def batch_observe(self, batch_obs, batch_reward, batch_done, batch_reset):
-        pass
-
-    def batch_observe_and_train(self, batch_obs, batch_reward,
-                                batch_done, batch_reset):
-        raise NotImplementedError
 
     def _loss(self, batch_obs, batch_acs):
         out = self.model(batch_obs)

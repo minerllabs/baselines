@@ -291,6 +291,8 @@ class SerialDiscreteActionWrapper(gym.ActionWrapper):
         The "noop" will be excluded from discrete action list.
     num_camera_discretize
         Number of discretization of yaw control (must be odd).
+    allow_pitch
+        If specified, this wrapper appends commands to control pitch.
     max_camera_range
         Maximum value of yaw control.
     """
@@ -380,7 +382,7 @@ class SerialDiscreteActionWrapper(gym.ActionWrapper):
                 # ([0, 0] is excluded)
                 delta_range = max_camera_range * 2 / (self.num_camera_discretize - 1)
                 if self.num_camera_discretize % 2 == 0:
-                    raise ValueError('Number of yaw discretization must be odd.')
+                    raise ValueError('Number of camera discretization must be odd.')
                 for i in range(self.num_camera_discretize):
                     op = copy.deepcopy(self.noop)
                     if i < self.num_camera_discretize // 2:
@@ -436,7 +438,6 @@ class CombineActionWrapper(gym.ActionWrapper):
     The combined action's names will be concatenation of originals, i.e.,
     "forward_back", "left_right", "snaek_sprint", "attack_place_equip_craft_nearbyCraft_nearbySmelt".
     """
-    # TODO: num_camera_discretize?
     def __init__(self, env):
         super().__init__(env)
 
@@ -705,6 +706,8 @@ class MultiDimensionalSoftmaxActionWrapper(gym.ActionWrapper):
         num_actions = []
         action_dict = OrderedDict({})
         for key in self.noop:
+            if self.num_camera_discretize % 2 == 0:
+                raise ValueError('Number of camera discretization must be odd.')
             if key == 'camera':
                 num_actions.append(self.num_camera_discretize)
                 num_actions.append(self.num_camera_discretize)
