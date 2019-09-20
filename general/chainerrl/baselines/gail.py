@@ -358,6 +358,7 @@ def main():
                             'MineRLTreechop-v0',
                             'MineRLNavigate-v0', 'MineRLNavigateDense-v0', 'MineRLNavigateExtreme-v0', 'MineRLNavigateExtremeDense-v0',
                             'MineRLObtainIronPickaxe-v0', 'MineRLObtainDiamond-v0',
+                            'MineRLObtainIronPickaxeDense-v0', 'MineRLObtainDiamondDense-v0',
                             'MineRLNavigateDenseFixed-v0'  # for debug use
                         ],
                         help='MineRL environment identifier.')
@@ -635,18 +636,6 @@ def _main(args):
         # a chainer.Optimizer. Only the value function needs it.
         policy_opt = chainer.optimizers.Adam(alpha=args.policy_lr)
         policy_opt.setup(vf)
-
-        """
-        # Draw the computational graph and save it in the output directory.
-        fake_obs = chainer.Variable(
-            policy.xp.zeros_like(
-                policy.xp.array(obs_space.low), dtype=np.float32)[None],
-            name='observation')
-        chainerrl.misc.draw_computational_graph(
-            [policy(fake_obs)], os.path.join(args.outdir, 'policy'))
-        chainerrl.misc.draw_computational_graph(
-            [vf(fake_obs)], os.path.join(args.outdir, 'vf'))
-        """
 
         actor = chainerrl.agents.TRPO(
             policy=policy,

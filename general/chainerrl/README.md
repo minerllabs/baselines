@@ -280,8 +280,8 @@ For BC, we shows the performance over episodes of the agent pretrained by expert
 
 BC outperforms [original paper](https://arxiv.org/abs/1904.10079)'s BC value 0.75 +- 0.39.
 For GAIL, it outperforms some of RL agents but lower than PPO result, which is contained in GAIL policy.
-Note that GAIL uses less prior knowledge than RL agents. It only uses camera discretization.
-Details of settings are shown below.
+Note that GAIL uses less prior knowledge than RL agents, which only uses camera discretization.
+Details of settings are shown in later sections.
 
 Videos of trained agents during their last evaluation round:
 - [Behavioral Cloning trial 1 (reward 5.0)](static/release_bc_gail/BehavioralCloningTreechop1.mp4)
@@ -305,14 +305,17 @@ GAIL trial 3 first 100 frames
 For `MineRLNavigateDense-v0`, both BC and GAIL outperform [original paper](https://arxiv.org/abs/1904.10079)'s BC result 5.57 +- 6.00, and comparable to other RL agents.
 
 Videos of trained agents during their last evaluation round:
-- (NA) Behavioral Cloning trial 1
-- (NA) Behavioral Cloning trial 2
-- (NA) Behavioral Cloning trial 3
+- [Behavioral Cloning trial 1 (reward 24.4)](static/release_bc_gail/BehavioralCloningNavigateDense1.mp4)
+- [Behavioral Cloning trial 2 (reward 71.3)](static/release_bc_gail/BehavioralCloningNavigateDense2.mp4)
+- [Behavioral Cloning trial 2 (reward 46.1)](static/release_bc_gail/BehavioralCloningNavigateDense3.mp4)
 - [GAIL trial 1 (reward 9.8)](static/release_bc_gail/GAILNavigateDense1.mp4)
 - (NA) GAIL trial 2
 - [GAIL trial 3 (reward 54.2)](static/release_bc_gail/GAILNavigateDense3.mp4)
 
-(NA) Behavioral Cloning first 100 frames
+Notice: Since recording videos of BC during training phases is failed, we alternatively recorded after those phase are finished.
+
+![Behavioral Cloning trial 2 first 100 frames](static/release_bc_gail/BehavioralCloningNavigateDense2.gif)  
+Behavioral Cloning trial 2 first 100 frames
 
 ![GAIL trial 3 first 100 frames](static/release_bc_gail/GAILNavigateDense3.gif)  
 GAIL trial 3 first 100 frames
@@ -347,17 +350,29 @@ BC/GAIL does not solve `MineRLObtainDiamond-v0`, either.
 
 In order to utilize original dataset in our BC/GAIL settings, we employed following conversion procedures.
 
-### Expert dataset conversion
+### Frame skipping
 
 Since expert data have no `frameskip`, we compressed several frames (8 in experiments) to unified one.
 Actions of a unified frame is replaced by one of compressed frames whose absolute value is maximum.
+
+## Action space settings
+
+In BC/GAIL, it contains 3 options: `discrete`, `continuous`, and `multi-dimensional-softmax`.
+These settings represent one discrete action, a set of continuous actions, and a set of discrete actions respectively.
+In `discrete` and `multi-dimensional-softmax` settings, it utilize the following action space conversion.
 
 ### Action space conversion
 
 Both agents utilizes the following camera discretization.
 BC also converted overall action sets to a discrete action space.
-It is basically same as those of RL agents. Actions of experts are casted to only one of the discrete actions.
+It is basically same as those of RL agents, except that it has more candidates of camera actions.
+Actions of experts are casted to only one of the discrete actions.
 
 #### Camera discretization
 Since ranges of yaw, pitch `[-180, 180]` are quite large especially for GAIL, we limited it to `[-10, 10]` respectively.
-Also, we converted this continuous range to a discrete spaces linearly (in these experiments, we modified to 7 discrete actions).
+Also, we converted this continuous range to equally spaced discrete actions.
+- In these experiments, we modified to 7 discrete actions. (i.e., `-10`, `-6.66`, `-3.33`, `0`, `3.33`, `6.66`, and `10`).
+
+#### Pitch control
+
+In BC, pitch control is disabled. While in GAIL, it is allowed. These parameters are speficied by the `--allow-pitch` option.

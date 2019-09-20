@@ -64,7 +64,7 @@ class Net(chainer.Chain):
     Output: np.array(shape=(n_actions,))
     """
     def __init__(self, n_actions, n_input_channels=4, activation=F.relu, bias=0.1, hiddens=None,
-                 action_wrapper=None, use_bn=False, modify_compassangle=False):
+                 action_wrapper=None, use_bn=False):
         self.n_actions = n_actions
         self.n_input_channels = n_input_channels
         self.activation = activation
@@ -72,7 +72,6 @@ class Net(chainer.Chain):
         self.use_bn = use_bn
         assert action_wrapper in ['discrete', 'continuous']
         self.action_wrapper = action_wrapper
-        self.modify_compassangle = modify_compassangle
 
         super().__init__()
         with self.init_scope():
@@ -93,10 +92,6 @@ class Net(chainer.Chain):
 
     def get_raw_value(self, x):
         h = np.array(x)
-        if self.modify_compassangle:
-            h = np.concatenate((
-                h[:-1],
-                np.clip(h[-1:] * 10, -1, 1)))
         if self.use_bn:
             for l, b in zip(self.conv_layers, self.bn_layers):
                 h = self.activation(b(l(h)))
@@ -202,6 +197,7 @@ def main():
                             'MineRLTreechop-v0',
                             'MineRLNavigate-v0', 'MineRLNavigateDense-v0', 'MineRLNavigateExtreme-v0', 'MineRLNavigateExtremeDense-v0',
                             'MineRLObtainIronPickaxe-v0', 'MineRLObtainDiamond-v0',
+                            'MineRLObtainIronPickaxeDense-v0', 'MineRLObtainDiamondDense-v0',
                             'MineRLNavigateDenseFixed-v0'  # for debug use
                         ],
                         help='MineRL environment identifier.')
@@ -238,8 +234,6 @@ def main():
     parser.add_argument('--use-ordinal-logit', action='store_true')
     # parser.add_argument('--write-video', type=str, default=None)
     parser.add_argument('--entropy-coef', type=float, default=0)
-    parser.add_argument('--modify-compassangle', action='store_true', default=False,
-                        help='modify compass angle')
     parser.add_argument('--allow-pitch', action='store_true', default=False,
                         help='Always set camera pitch as 0 in agent action.')
     parser.add_argument('--max-camera-range', type=float, default=10.,
@@ -285,12 +279,8 @@ def _main(args):
         if test and args.monitor:
             env = gym.wrappers.Monitor(
                 env, args.outdir, mode='evaluation' if test else 'training', video_callable=lambda episode_id: True)
-        print('1', env.observation_space)
         if args.gray_scale:
-            env2 = GrayScaleWrapper(env, dict_space_key='pov')
-            print('2', env.observation_space)
             env = GrayScaleWrapper(env, dict_space_key='pov')
-            print('3', env.observation_space)
         if args.frame_skip is not None:
             env = FrameSkip(env, skip=args.frame_skip)
         if args.env.startswith('MineRLObtain'):
@@ -360,8 +350,7 @@ def _main(args):
             n_actions, n_input_channels=n_input_channels,
             use_bn=args.use_batch_normalization,
             activation=activation_func,
-            action_wrapper=args.action_wrapper,
-            modify_compassangle=args.modify_compassangle)
+            action_wrapper=args.action_wrapper)
 
     # Draw the computational graph and save it in the output directory.
     sample_obs = env.observation_space.sample()
