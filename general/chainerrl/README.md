@@ -275,10 +275,13 @@ The exact hyperparameters used for each algorithm can be found from the links in
 ![release_bc_gail_MineRLTreechop-v0](static/release_bc_gail/MineRLTreechop-v0.png)
 
 The figure above shows the performance of the algorithms during the training phase on the `MineRLTreechop-v0` task.
-Each algorithm is independently trained 3 times (trials), and the shaded area represents the standard deviation (not the standard error) over the score of the three trials
-The curves are smoothed by taking an average over 30 episodes for visibility.
+Settings are same as those of the previous section.
+For BC, we shows the performance over episodes of the agent pretrained by expert dataset instead.
 
-**TODO: COMMENTS**
+BC outperforms [original paper](https://arxiv.org/abs/1904.10079)'s BC value 0.75 +- 0.39.
+For GAIL, it outperforms some of RL agents but lower than PPO result, which is contained in GAIL policy.
+Note that GAIL uses less prior knowledge than RL agents. It only uses camera discretization.
+Details of settings are shown below.
 
 Videos of trained agents during their last evaluation round:
 - [Behavioral Cloning trial 1 (reward 5.0)](static/release_bc_gail/BehavioralCloningTreechop1.mp4)
@@ -299,7 +302,7 @@ GAIL trial 3 first 100 frames
 
 ![release_bc_gail_MineRLNavigateDense-v0](static/release_bc_gail/MineRLNavigateDense-v0.png)
 
-**TODO: COMMENTS**
+For `MineRLNavigateDense-v0`, both BC and GAIL outperform [original paper](https://arxiv.org/abs/1904.10079)'s BC result 5.57 +- 6.00, and comparable to other RL agents.
 
 Videos of trained agents during their last evaluation round:
 - (NA) Behavioral Cloning trial 1
@@ -315,12 +318,11 @@ Videos of trained agents during their last evaluation round:
 GAIL trial 3 first 100 frames
 
 
-
 ## MineRLNavigate-v0
 
 ![release_bc_gail_MineRLNavigate-v0](static/release_bc_gail/MineRLNavigate-v0.png)
 
-**TODO: COMMENTS**
+BC and GAIL shows better performance than RL agents without expert dataset and [original paper](https://arxiv.org/abs/1904.10079)'s BC (4.23 +- 4.15).
 
 Videos of trained agents during their last evaluation round:
 - [Behavioral Cloning trial 1 (reward 0.0)](static/release_bc_gail/BehavioralCloningNavigate1.mp4)
@@ -340,3 +342,22 @@ GAIL trial 1 first 100 frames
 ## MineRLObtainDiamond-v0
 
 BC/GAIL does not solve `MineRLObtainDiamond-v0`, either.
+
+## Data conversion
+
+In order to utilize original dataset in our BC/GAIL settings, we employed following conversion procedures.
+
+### Expert dataset conversion
+
+Since expert data have no `frameskip`, we compressed several frames (8 in experiments) to unified one.
+Actions of a unified frame is replaced by one of compressed frames whose absolute value is maximum.
+
+### Action space conversion
+
+Both agents utilizes the following camera discretization.
+BC also converted overall action sets to a discrete action space.
+It is basically same as those of RL agents. Actions of experts are casted to only one of the discrete actions.
+
+#### Camera discretization
+Since ranges of yaw, pitch `[-180, 180]` are quite large especially for GAIL, we limited it to `[-10, 10]` respectively.
+Also, we converted this continuous range to a discrete spaces linearly (in these experiments, we modified to 7 discrete actions).
