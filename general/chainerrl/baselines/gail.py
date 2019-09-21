@@ -44,21 +44,21 @@ logger = getLogger(__name__)
 
 
 def parse_action_wrapper(action_wrapper, env, always_keys, reverse_keys,
-                         exclude_keys, exclude_noop, allow_pitch,
+                         exclude_keys, exclude_noop,
                          num_camera_discretize, max_camera_range):
     if action_wrapper == 'discrete':
         return SerialDiscreteActionWrapper(
             env,
             always_keys=always_keys, reverse_keys=reverse_keys, exclude_keys=exclude_keys, exclude_noop=exclude_noop,
-            num_camera_discretize=num_camera_discretize, allow_pitch=allow_pitch,
+            num_camera_discretize=num_camera_discretize, allow_pitch=True,
             max_camera_range=max_camera_range)
     elif action_wrapper == 'continuous':
         return NormalizedContinuousActionWrapper(
-            env, disable_pitch=(not allow_pitch),
+            env, allow_pitch=True,
             max_camera_range=max_camera_range)
     elif action_wrapper == 'multi-dimensional-softmax':
         return MultiDimensionalSoftmaxActionWrapper(
-            env,
+            env, allow_pitch=True,
             num_camera_discretize=num_camera_discretize,
             max_camera_range=max_camera_range)
     else:
@@ -109,8 +109,6 @@ def main():
                         choices=['sigmoid', 'tanh', 'relu', 'leaky-relu'])
     parser.add_argument('--prioritized-elements', type=str, nargs='+', default=None,
                         help='define priority of each element on discrete setting')
-    parser.add_argument('--allow-pitch', action='store_true', default=False,
-                        help='Always set camera pitch as 0 in agent action.')
 
     parser.add_argument('--policy', type=str, default='trpo', choices=['trpo', 'ppo'])
     parser.add_argument('--discriminator-lr', type=float, default=3e-4)
@@ -190,7 +188,6 @@ def _main(args):
             env,
             always_keys=args.always_keys, reverse_keys=args.reverse_keys,
             exclude_keys=args.exclude_keys, exclude_noop=args.exclude_noop,
-            allow_pitch=args.allow_pitch,
             num_camera_discretize=args.num_camera_discretize,
             max_camera_range=args.max_camera_range)
 
@@ -270,17 +267,19 @@ def _main(args):
             grayscale=args.gray_scale)
     if args.action_wrapper == 'discrete':
         action_converter = generate_discrete_converter(
-            args.env, args.prioritized_elements,
-            args.always_keys, args.reverse_keys,
-            args.exclude_keys, args.exclude_noop,
-            args.allow_pitch, args.max_camera_range,
-            args.num_camera_discretize)
+            env_name=args.env, prioritized_elements=args.prioritized_elements,
+            always_keys=args.always_keys, reverse_keys=args.reverse_keys,
+            exclude_keys=args.exclude_keys, exclude_noop=args.exclude_noop,
+            allow_pitch=True, max_camera_range=args.max_camera_range,
+            num_camera_discretize=args.num_camera_discretize)
     elif args.action_wrapper == 'continuous':
         action_converter = generate_continuous_converter(
-            args.env, args.allow_pitch, args.max_camera_range)
+            env_name=args.env, allow_pitch=True,
+            max_camera_range=args.max_camera_range)
     elif args.action_wrapper == 'multi-dimensional-softmax':
         action_converter = generate_multi_dimensional_softmax_converter(
-            args.allow_pitch, args.max_camera_range, args.num_camera_discretize)
+            allow_pitch=True, max_camera_range=args.max_camera_range,
+            num_camera_discretize=args.num_camera_discretize)
     if args.demo:
         experts = None  # dummy
     else:

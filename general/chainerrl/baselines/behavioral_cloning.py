@@ -146,11 +146,11 @@ def parse_action_wrapper(action_wrapper, env, always_keys, reverse_keys,
             max_camera_range=max_camera_range)
     elif action_wrapper == 'continuous':
         return NormalizedContinuousActionWrapper(
-            env, disable_pitch=(not allow_pitch),
+            env, allow_pitch=allow_pitch,
             max_camera_range=max_camera_range)
     elif action_wrapper == 'multi-dimensional-softmax':
         return MultiDimensionalSoftmaxActionWrapper(
-            env,
+            env, allow_pitch=allow_pitch,
             num_camera_discretize=num_camera_discretize,
             max_camera_range=max_camera_range)
     else:

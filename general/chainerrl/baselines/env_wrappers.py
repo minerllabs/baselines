@@ -572,9 +572,9 @@ class NormalizedContinuousActionWrapper(gym.ActionWrapper):
 
     BINARY_KEYS = ['forward', 'back', 'left', 'right', 'jump', 'sneak', 'sprint', 'attack']
 
-    def __init__(self, env, disable_pitch=False, max_camera_range=10):
+    def __init__(self, env, allow_pitch=False, max_camera_range=10):
         super().__init__(env)
-        self.disable_pitch = disable_pitch
+        self.allow_pitch = allow_pitch
         self.wrapping_action_space = self.env.action_space
         self._noop_template = OrderedDict([
             ('forward', 0),
@@ -641,7 +641,7 @@ class NormalizedContinuousActionWrapper(gym.ActionWrapper):
                 orig_values = np.clip(action[idx:idx + 2], -1, 1)
                 values = (orig_values * self.value_ranges[idx:idx + 2]
                           + self.value_means[idx:idx + 2])
-                if self.disable_pitch:
+                if not self.allow_pitch:
                     values[0] = 0
 
                 original_action[key] = values
@@ -666,10 +666,11 @@ class NormalizedContinuousActionWrapper(gym.ActionWrapper):
 class MultiDimensionalSoftmaxActionWrapper(gym.ActionWrapper):
     BINARY_KEYS = ['forward', 'back', 'left', 'right', 'jump', 'sneak', 'sprint', 'attack']
 
-    def __init__(self, env, max_camera_range=10,
+    def __init__(self, env, allow_pitch=False, max_camera_range=10,
                  num_camera_discretize=7):
         super().__init__(env)
 
+        self.allow_pitch = allow_pitch
         self.max_camera_range = max_camera_range
         self.num_camera_discretize = num_camera_discretize
         self.wrapping_action_space = self.env.action_space
@@ -734,6 +735,8 @@ class MultiDimensionalSoftmaxActionWrapper(gym.ActionWrapper):
                     self.max_camera_range
                     * (action[idx + 1] - half_scale)
                     / half_scale)
+                if not self.allow_pitch:
+                    original_action['camera'][0] = 0
                 idx += 2
             else:
                 original_action[key] = int(action[idx])
