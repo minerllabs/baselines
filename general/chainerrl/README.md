@@ -357,16 +357,18 @@ Actions of a unified frame is replaced by one of compressed frames whose absolut
 
 ## Action space settings
 
-BC and GAIL have 3 options: `discrete`, `continuous`, and `multi-dimensional-softmax` for the action space.
+For the action space, BC and GAIL have 3 options: `discrete`, `continuous`, and `multi-dimensional-softmax`.
 These options represent one discrete action, a set of continuous actions, and a set of discrete actions respectively.
 We employed the following action space conversion for each setting:
 
 ### Action space conversion
 
 Since ranges of yaw, pitch `[-180, 180]` are quite large especially for GAIL, we limited them to `[-10, 10]` respectively.
+
 BC uses `discrete` setting, which also converts overall action sets to a discrete action space.
 It is basically same as those of RL agents, except that it has more candidates of camera actions (**camera discretization**).
-(For more information, see the **Discretization to a discrete action space** section below.)
+
+For more information, see the **Discretization to a discrete action space** section below.
 
 #### Camera discretization
 
@@ -392,4 +394,4 @@ Ties are broken by the order of `--prioritized-elements`.
 
 #### Pitch control
 
-In BC, pitch control is disabled. While in GAIL, it is allowed. These parameters are speficied by the `--allow-pitch` option.
+In BC, pitch control is disabled by default. This parameter can be modified by the `--allow-pitch` option.
