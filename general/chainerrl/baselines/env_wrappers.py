@@ -151,6 +151,8 @@ class PoVWithCompassAngleWrapper(gym.ObservationWrapper):
 
 class UnifiedObservationWrapper(gym.ObservationWrapper):
     """Take 'pov', 'compassAngle', 'inventory' and concatenate with scaling.
+    Each element of 'inventory' is converted to a square whose side length is region_size.
+    The color of each square is correlated to the reciprocal of (the number of the corresponding item + 1).
     """
     def __init__(self, env, region_size=8):
         super().__init__(env)

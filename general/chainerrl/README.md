@@ -302,7 +302,7 @@ GAIL trial 3 first 100 frames
 
 ![release_bc_gail_MineRLNavigateDense-v0](static/release_bc_gail/MineRLNavigateDense-v0.png)
 
-For `MineRLNavigateDense-v0`, both BC and GAIL outperform [original paper](https://arxiv.org/abs/1904.10079)'s BC result 5.57 +- 6.00, and comparable to other RL agents.
+For `MineRLNavigateDense-v0`, both BC and GAIL outperform [original paper](https://arxiv.org/abs/1904.10079)'s BC result 5.57 +- 6.00, and are comparable to other RL agents.
 
 Videos of trained agents during their last evaluation round:
 - [Behavioral Cloning trial 1 (reward 24.4)](static/release_bc_gail/BehavioralCloningNavigateDense1.mp4)
@@ -357,21 +357,21 @@ Actions of a unified frame is replaced by one of compressed frames whose absolut
 
 ## Action space settings
 
-In BC/GAIL, it contains 3 options: `discrete`, `continuous`, and `multi-dimensional-softmax`.
-These settings represent one discrete action, a set of continuous actions, and a set of discrete actions respectively.
-In `discrete` and `multi-dimensional-softmax` settings, it utilize the following action space conversion.
+BC and GAIL have 3 options: `discrete`, `continuous`, and `multi-dimensional-softmax` for the action space.
+These options represent one discrete action, a set of continuous actions, and a set of discrete actions respectively.
+We employed the following action space conversion for each setting:
 
 ### Action space conversion
 
-Both agents utilizes the following camera discretization.
-BC also converted overall action sets to a discrete action space.
-It is basically same as those of RL agents, except that it has more candidates of camera actions.
+Since ranges of yaw, pitch `[-180, 180]` are quite large especially for GAIL, we limited them to `[-10, 10]` respectively.
+BC uses `discrete` setting, which also converts overall action sets to a discrete action space.
+It is basically same as those of RL agents, except that it has more candidates of camera actions (**camera discretization**).
 (For more information, see the **Discretization to a discrete action space** section below.)
 
 #### Camera discretization
 
-Since ranges of yaw, pitch `[-180, 180]` are quite large especially for GAIL, we limited it to `[-10, 10]` respectively.
-Also, we converted this continuous range to equally spaced discrete actions.
+In addition to camera range limitation, `discrete` and `multi-dimensional-softmax` settings uses the camera discretization.
+We converted this continuous range to equally spaced discrete actions.
 
 - In these experiments, we modified to 7 discrete actions. (i.e., `-10`, `-6.66`, `-3.33`, `0`, `3.33`, `6.66`, and `10`).
 
@@ -380,10 +380,10 @@ This value is specified by `--num-camera-discretize`. **NOTE THAT THIS VALUE MUS
 #### Discretization to a discrete action space
 
 On the `discrete` setting, expert actions are converted to only one action.
-The converted action is selected based on a sequence of conditions, which compare the value of the corresponding element with certaion constant.
+The converted action is selected based on a sequence of conditions, which compare the value of the corresponding element with certaion threshold.
 If more than 1 conditions are satisfied. It selects an action based on the following order:
 
-- 'nearbyCraft', 'nearbySmelt', 'craft', 'equip', 'place', 'camera', 'forward', 'back', 'left', 'right', 'jump', 'sneak', 'sprint', 'attack'
+- `nearbyCraft`, `nearbySmelt`, `craft`, `equip`, `place`, `camera`, `forward`, `back`, `left`, `right`, `jump`, `sneak`, `sprint`, `attack`
 
 You can control the order of conditions by using the `--prioritized-elements` option.
 If one of conditions specified in `--prioritized-elements` is `True`, then it precedes the original priorities.
