@@ -23,14 +23,22 @@ See [MineRL installation](https://github.com/minerllabs/minerl#installation) and
 
 # Getting started
 
+### Dataset download
+- In order to run the Behavoral Cloning and GAIL agents, you need to download expert dataset into an appropriate location (by default, `baselines/expert_dataset`).
+### Training
 - [baselines/dddqn.sh]
     - Double Dueling DQN (DDDQN), with implementation and hyperparameters as described in the [proposal paper](https://arxiv.org/abs/1904.10079) (code: [here](https://github.com/minerllabs/minerl/blob/master/tests/excluded/navigate_dqn_test.py) and [here](https://github.com/minerllabs/minerl/blob/master/tests/excluded/treechop_dqn_test.py)).
 - [baselines/rainbow.sh]
     - Rainbow
 - [baselines/ppo.sh]
     - PPO
+- [baselines/behavoral_cloning.sh]
+    - Behavoral Cloning (BC)
+- [baselines/gail.sh]
+    - GAIL
 
-# Experimental results of DDDQN/Rainbow/PPO
+
+# Overview of experimental results of DDDQN/Rainbow/PPO/BC/GAIL
 
 |                    | Treechop           | Navigate         | NavigateDense      |
 | :---               | ---:               | ---:             | ---:               |
@@ -41,18 +49,24 @@ See [MineRL installation](https://github.com/minerllabs/minerl#installation) and
 | (**ours**) DDDQN   | 9.68 +- 5.28       | 5.00 +- 21.79    | 57.84 +- 50.74     |
 | (**ours**) Rainbow | **60.39 +- 19.88** | 9.00 +- 28.62    | 66.48 +- 38.73     |
 | (**ours**) PPO     | 38.44 +- 19.04     | 6.00 +- 23.75    | 80.84 +- 51.29     |
+| (**ours**) BC      | 7.93 +- 3.27       | 45.00 +- 50.0    | 77.22 +- 60.78     |
+| (**ours**) GAIL    | 25.26 +- 6.38      | 28.00 +- 45.13   | 66.92 +- 42.59     |
 | (paper) Human      | 64.00 +- 0.00      | 100.00 +- 0.00   | 164.00 +- 0.00     |
 | (paper) Random     | 3.81 +- 0.57       | 1.00 +- 1.95     | -4.37 +- 5.10      |
 
-Talbe 1: (for "paper") Results over the best 100 contiguous episodes. +- denotes standard deviation.  
-(for "ours") Results over the best 100 contiguous episodes among three trials. +- denotes standard deviation.  
+Table 1: (for "paper") Results over the best 100 contiguous episodes. +- denotes standard deviation.  
+(for "ours") Results over the best 100 contiguous episodes among three trials (for GAIL in Navigate tasks, two trials instead). +- denotes standard deviation.
 We do not emphasize the best performance for Navigate since the standard deviation is very large.  
 See Table 1 of [proposal paper](https://arxiv.org/abs/1904.10079) for more information.  
 Note that our current implementation does not use trajectory data.
 
+For experiments of DDDQN/Rainbow/PPO, we used **MineRL v0.1.18** which is the latest as of July 9, 2019.
+For experiments of BC/GAIL, we used **MineRL v0.2.3**.
 
-The figures below show the *training* reward graphs for each algorithm with task-specific prior knowledge used to shape the action and observation space.  
-For experitments, we used **MineRL v0.1.18** which is the latest as of July 9, 2019.  
+
+# Experimental results of DDDQN/Rainbow/PPO
+
+The figures below show the *training* reward graphs for each of DDDQN/Rainbow/PPO with task-specific prior knowledge used to shape the action and observation space.
 
 The exact hyperparameters used for each algorithm can be found from the links in the "Getting Started" section and their corresponding Python scripts (`baselines/dqn_family.py`, `baselines/ppo.py`).
 
@@ -171,6 +185,7 @@ The set of action_space keys are different among tasks, but some of them are com
 `env_wrappers.SerialDiscreteActionWrapper` is the corresponding code for shaping the action space.
 
 The following sections describe the various strategies we employed in the shaping of the action space.
+
 ### Discretizing
 
 The only action key which is continuous is `camera`.
@@ -190,7 +205,7 @@ These actions are removed from the agent's action choice.
 
 Actions specified as `--exclude-keys` are simply disabled and they will be never triggered.
 
-For example, 
+For example,
 On `MineRLTreechop-v0`,
   - `--always-keys`: `attack`
   - `--exclude-keys`: `back`, `left`, `right`, `sneak`, `sprint`
@@ -248,3 +263,135 @@ Resulting action spaces after shaped with prior knowledge are:
   4. `{'jump': 0, 'camera': [0, 10]}`  
   Note that `forward`, `sprint`, `attack` are always `1` and `back`, `left`, `right`, `sneak`, `place` are always `0`.
 - Obtain*: `Discrete(36)`
+
+# Experimental results of BC/GAIL
+
+The figures below show the *training* reward graphs for both BC and GAIL along with the criteria used to process the expert dataset.
+
+The exact hyperparameters used for each algorithm can be found from the links in the "Getting Started" section and their corresponding Python scripts (`baselines/behavoral_cloning.py`, `baselines/gail.py`).
+
+## MineRLTreechop-v0
+
+![release_bc_gail_MineRLTreechop-v0](static/release_bc_gail/MineRLTreechop-v0.png)
+
+The figure above shows the performance of the algorithms during the training phase on the `MineRLTreechop-v0` task.
+Settings are same as those of the previous section.
+For BC, we shows the performance over episodes of the agent pretrained by expert dataset instead.
+
+BC outperforms [original paper](https://arxiv.org/abs/1904.10079)'s BC value 0.75 +- 0.39.
+For GAIL, it outperforms some of RL agents but lower than PPO result, which is contained in GAIL policy.
+Note that GAIL uses less prior knowledge than RL agents, which only uses camera discretization.
+Details of settings are shown in later sections.
+
+Videos of trained agents during their last evaluation round:
+- [Behavioral Cloning trial 1 (reward 5.0)](static/release_bc_gail/BehavioralCloningTreechop1.mp4)
+- [Behavioral Cloning trial 2 (reward 6.0)](static/release_bc_gail/BehavioralCloningTreechop2.mp4)
+- [Behavioral Cloning trial 3 (reward 11.0)](static/release_bc_gail/BehavioralCloningTreechop3.mp4)
+- [GAIL trial 1 (reward 14.0)](static/release_bc_gail/GAILTreechop1.mp4)
+- [GAIL trial 2 (reward 11.0)](static/release_bc_gail/GAILTreechop2.mp4)
+- [GAIL trial 3 (reward 29.0)](static/release_bc_gail/GAILTreechop3.mp4)
+
+![BehavioralCloning trial 3 first 100 frames](static/release_bc_gail/BehavioralCloningTreechop3.gif)  
+Behavioral Cloning trial 3 first 100 frames
+
+![GAIL trial 3 first 100 frames](static/release_bc_gail/GAILTreechop3.gif)  
+GAIL trial 3 first 100 frames
+
+
+## MineRLNavigateDense-v0
+
+![release_bc_gail_MineRLNavigateDense-v0](static/release_bc_gail/MineRLNavigateDense-v0.png)
+
+For `MineRLNavigateDense-v0`, both BC and GAIL outperform [original paper](https://arxiv.org/abs/1904.10079)'s BC result 5.57 +- 6.00, and are comparable to other RL agents.
+
+Videos of trained agents during their last evaluation round:
+- [Behavioral Cloning trial 1 (reward 24.4)](static/release_bc_gail/BehavioralCloningNavigateDense1.mp4)
+- [Behavioral Cloning trial 2 (reward 71.3)](static/release_bc_gail/BehavioralCloningNavigateDense2.mp4)
+- [Behavioral Cloning trial 2 (reward 46.1)](static/release_bc_gail/BehavioralCloningNavigateDense3.mp4)
+- [GAIL trial 1 (reward 9.8)](static/release_bc_gail/GAILNavigateDense1.mp4)
+- (NA) GAIL trial 2
+- [GAIL trial 3 (reward 54.2)](static/release_bc_gail/GAILNavigateDense3.mp4)
+
+Notice: Since recording videos of BC during training phases is failed, we alternatively recorded after those phase are finished.
+
+![Behavioral Cloning trial 2 first 100 frames](static/release_bc_gail/BehavioralCloningNavigateDense2.gif)  
+Behavioral Cloning trial 2 first 100 frames
+
+![GAIL trial 3 first 100 frames](static/release_bc_gail/GAILNavigateDense3.gif)  
+GAIL trial 3 first 100 frames
+
+
+## MineRLNavigate-v0
+
+![release_bc_gail_MineRLNavigate-v0](static/release_bc_gail/MineRLNavigate-v0.png)
+
+BC and GAIL show better performance than RL agents without expert dataset and [original paper](https://arxiv.org/abs/1904.10079)'s BC (4.23 +- 4.15).
+
+Videos of trained agents during their last evaluation round:
+- [Behavioral Cloning trial 1 (reward 0.0)](static/release_bc_gail/BehavioralCloningNavigate1.mp4)
+- [Behavioral Cloning trial 2 (reward 100.0)](static/release_bc_gail/BehavioralCloningNavigate2.mp4)
+- [Behavioral Cloning trial 3 (reward 100.0)](static/release_bc_gail/BehavioralCloningNavigate3.mp4)
+- [GAIL trial 1 (reward 0.0)](static/release_bc_gail/GAILNavigate1.mp4)
+- [GAIL trial 2 (reward 0.0)](static/release_bc_gail/GAILNavigate2.mp4)
+- (NA) GAIL trial 3
+
+![BehavioralCloning trial 2 first 100 frames](static/release_bc_gail/BehavioralCloningNavigate2.gif)  
+Behavioral Cloning trial 2 first 100 frames
+
+![GAIL trial 1 first 100 frames](static/release_bc_gail/GAILNavigate1.gif)  
+GAIL trial 1 first 100 frames
+
+
+## MineRLObtainDiamond-v0
+
+BC/GAIL aren't able to solve `MineRLObtainDiamond-v0`, either.
+
+## Data conversion
+
+In order to utilize original dataset in our BC/GAIL settings, we employed following conversion procedures.
+
+### Frame skipping
+
+Since expert data have no `frameskip`, we compressed several frames (8 in experiments) to unified one.
+Actions of a unified frame is replaced by one of compressed frames whose absolute value is maximum.
+
+## Action space settings
+
+For the action space, BC and GAIL have 3 options: `discrete`, `continuous`, and `multi-dimensional-softmax`.
+These options represent one discrete action, a set of continuous actions, and a set of discrete actions respectively.
+We employed the following action space conversion for each setting:
+
+### Action space conversion
+
+Since ranges of yaw, pitch `[-180, 180]` are quite large especially for GAIL, we limited them to `[-10, 10]` respectively.
+
+BC uses `discrete` setting, which also converts overall action sets to a discrete action space.
+It is basically same as those of RL agents, except that it has more candidates of camera actions (**camera discretization**).
+
+For more information, see the **Discretization to a discrete action space** section below.
+
+#### Camera discretization
+
+In addition to camera range limitation, `discrete` and `multi-dimensional-softmax` settings uses the camera discretization.
+We converted this continuous range to equally spaced discrete actions.
+
+- In these experiments, we modified to 7 discrete actions. (i.e., `-10`, `-6.66`, `-3.33`, `0`, `3.33`, `6.66`, and `10`).
+
+This value is specified by `--num-camera-discretize`. **NOTE THAT THIS VALUE MUST BE AN ODD NUMBER.**
+
+#### Discretization to a discrete action space
+
+On the `discrete` setting, expert actions are converted to only one action.
+The converted action is selected based on a sequence of conditions, which compare the value of the corresponding element with certaion threshold.
+If more than 1 conditions are satisfied. It selects an action based on the following order:
+
+- `nearbyCraft`, `nearbySmelt`, `craft`, `equip`, `place`, `camera`, `forward`, `back`, `left`, `right`, `jump`, `sneak`, `sprint`, `attack`
+
+You can control the order of conditions by using the `--prioritized-elements` option.
+If one of conditions specified in `--prioritized-elements` is `True`, then it precedes the original priorities.
+Ties are broken by the order of `--prioritized-elements`.
+
+
+#### Pitch control
+
+In BC, pitch control is disabled by default. This parameter can be modified by the `--allow-pitch` option.
