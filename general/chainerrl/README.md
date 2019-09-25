@@ -69,7 +69,7 @@ For experiments of BC/GAIL, we used **MineRL v0.2.3**.
 # Experimental results of DDDQN/Rainbow/PPO
 
 The figures below show the *training* reward graphs for each of DDDQN/Rainbow/PPO with task-specific prior knowledge used to shape the action and observation space.
-For experitments, we used **MineRL v0.2.3** which is the latest as of September 11, 2019.  
+For experitments, we used **MineRL v0.1.18** which is the latest as of July 9, 2019.  
 
 The exact hyperparameters used for each algorithm can be found from the links in the "Getting Started" section and their corresponding Python scripts (`baselines/dqn_family.py`, `baselines/ppo.py`).
 
