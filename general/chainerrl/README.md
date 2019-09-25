@@ -1,5 +1,8 @@
 # MineRL Competition's baseline implementation with ChainerRL
 
+**Note**:  
+For experitments, we used **MineRL v0.2.3** which is the latest as of September 11, 2019.  
+
 This repository contains a set of baselines implementations to help you get started with the [MineRL](https://github.com/minerllabs/minerl) competition. These implementations were adapted from  [ChainerRL](https://github.com/chainer/chainerrl) and use [Chainer](https://chainer.org/).
 
 # Resources
@@ -13,8 +16,8 @@ This repository contains a set of baselines implementations to help you get star
 # Installation
 
 ```sh
-git clone git@github.com:minerllabs/quick_start.git
-cd quick_start/chainerrl_baselines
+git clone git@github.com:minerllabs/baselines.git
+cd general/chainerrl
 pip install -r requirements.txt
 ```
 
@@ -32,27 +35,26 @@ See [MineRL installation](https://github.com/minerllabs/minerl#installation) and
 
 # Experimental results of DDDQN/Rainbow/PPO
 
-|                    | Treechop           | Navigate         | NavigateDense      |
-| :---               | ---:               | ---:             | ---:               |
-| (paper) DDDQN      | 3.73 +- 0.61       | 0.00 +- 0.00     | 55.59 +- 11.38     |
-| (paper) A2C        | 2.61 +- 0.50       | 0.00 +- 0.00     | -0.97 +- 3.32      |
-| (paper) BC         | 0.75 +- 0.39       | 4.23 +- 4.15     | 5.57 +- 6.00       |
-| (paper) PreDQN     | 4.16 +- 0.82       | 6.00 +- 4.65     | **94.96 +- 13.42** |
-| (**ours**) DDDQN   | 9.68 +- 5.28       | 5.00 +- 21.79    | 57.84 +- 50.74     |
-| (**ours**) Rainbow | **60.39 +- 19.88** | 9.00 +- 28.62    | 66.48 +- 38.73     |
-| (**ours**) PPO     | 38.44 +- 19.04     | 6.00 +- 23.75    | 80.84 +- 51.29     |
-| (paper) Human      | 64.00 +- 0.00      | 100.00 +- 0.00   | 164.00 +- 0.00     |
-| (paper) Random     | 3.81 +- 0.57       | 1.00 +- 1.95     | -4.37 +- 5.10      |
+|                    | use trajectory dataset? | Treechop           | Navigate         | NavigateDense      |
+| :---               | :---                    | ---:               | ---:             | ---:               |
+| (paper) DDDQN      | No                      | 3.73 +- 0.61       | 0.00 +- 0.00     | 55.59 +- 11.38     |
+| (paper) A2C        | No                      | 2.61 +- 0.50       | 0.00 +- 0.00     | -0.97 +- 3.32      |
+| (paper) BC         | Yes                     | 0.75 +- 0.39       | 4.23 +- 4.15     | 5.57 +- 6.00       |
+| (paper) PreDQN     | Yes                     | 4.16 +- 0.82       | 6.00 +- 4.65     | **94.96 +- 13.42** |
+| (**ours**) DDDQN   | No                      | 9.68 +- 5.28       | 5.00 +- 21.79    | 57.84 +- 50.74     |
+| (**ours**) Rainbow | No                      | **60.39 +- 19.88** | 9.00 +- 28.62    | 66.48 +- 38.73     |
+| (**ours**) PPO     | No                      | 38.44 +- 19.04     | 6.00 +- 23.75    | 80.84 +- 51.29     |
+| (paper) Human      | -                       | 64.00 +- 0.00      | 100.00 +- 0.00   | 164.00 +- 0.00     |
+| (paper) Random     | -                       | 3.81 +- 0.57       | 1.00 +- 1.95     | -4.37 +- 5.10      |
 
-Talbe 1: (for "paper") Results over the best 100 contiguous episodes. +- denotes standard deviation.  
-(for "ours") Results over the best 100 contiguous episodes among three trials. +- denotes standard deviation.  
+Talbe 1: (for "paper") Results over the best 100 contiguous episodes. "+-" denotes standard deviation.  
+(for "ours") Results over the best 100 contiguous episodes among three trials. "+-" denotes standard deviation.  
 We do not emphasize the best performance for Navigate since the standard deviation is very large.  
 See Table 1 of [proposal paper](https://arxiv.org/abs/1904.10079) for more information.  
-Note that our current implementation does not use trajectory data.
 
 
 The figures below show the *training* reward graphs for each algorithm with task-specific prior knowledge used to shape the action and observation space.  
-For experitments, we used **MineRL v0.1.18** which is the latest as of July 9, 2019.  
+For experitments, we used **MineRL v0.2.3** which is the latest as of September 11, 2019.  
 
 The exact hyperparameters used for each algorithm can be found from the links in the "Getting Started" section and their corresponding Python scripts (`baselines/dqn_family.py`, `baselines/ppo.py`).
 
@@ -157,9 +159,9 @@ DDDQN trial 1 first 100 frames
 The detail is described in the "Exclusive actions" section below.
 
 
-## Prior knowledge for action/observation spaces
+## Prior knowledge of action/observation spaces for Rainbow/PPO/DDDQN
 
-For `MineRLTreechop-v0`, `MineRLNavigateDense-v0` and `MineRLNavigate-v0`, Rainbow/PPO/DDDQN shape the action/observation space based on prior domain knowledge about the tasks.
+For `MineRLTreechop-v0`, `MineRLNavigateDense-v0` and `MineRLNavigate-v0`, **Rainbow/PPO/DDDQN** shapes the action/observation space based on prior domain knowledge about the tasks.
 This shaping was inspired by the [MineRL competition proposal paper's](https://arxiv.org/abs/1904.10079) implementations
 ([Treechop](https://github.com/minerllabs/minerl/blob/master/tests/excluded/treechop_dqn_test.py),
 [Navigate](https://github.com/minerllabs/minerl/blob/master/tests/excluded/navigate_dqn_test.py)).
