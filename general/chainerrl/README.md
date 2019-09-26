@@ -53,12 +53,12 @@ See [MineRL installation](https://github.com/minerllabs/minerl#installation) and
 | (**ours**) DDDQN   | No                      | 9.68 +- 5.28       | 5.00 +- 21.79    | 57.84 +- 50.74     |
 | (**ours**) Rainbow | No                      | **60.39 +- 19.88** | 9.00 +- 28.62    | 66.48 +- 38.73     |
 | (**ours**) PPO     | No                      | 38.44 +- 19.04     | 6.00 +- 23.75    | 80.84 +- 51.29     |
-| (**ours**) BC      | Yes                     | 7.93 +- 3.27       | 45.00 +- 50.0    | 77.22 +- 60.78     |
-| (**ours**) GAIL    | Yes                     | 25.26 +- 6.38      | 28.00 +- 45.13   | 66.92 +- 42.59     |
+| (**ours**) BC      | Yes                     | 9.27 +- 5.21       | 46.00 +- 50.1    | 69.54 +- 57.02     |
+| (**ours**) GAIL    | Yes                     | 16.34 +- 6.85      | 32.00 +- 46.88   | 59.32 +- 30.60     |
 | (paper) Human      | -                       | 64.00 +- 0.00      | 100.00 +- 0.00   | 164.00 +- 0.00     |
 | (paper) Random     | -                       | 3.81 +- 0.57       | 1.00 +- 1.95     | -4.37 +- 5.10      |
 
-Table 1: (for "paper") Results over the best 100 contiguous episodes. "+-" denotes standard deviation.  
+Table 1: (for "paper") Results over the best 100 contiguous episodes. +- denotes standard deviation.  
 (for "ours") Results over the best 100 contiguous episodes among three trials (for GAIL in Navigate tasks, two trials instead). +- denotes standard deviation.
 We do not emphasize the best performance for Navigate since the standard deviation is very large.  
 See Table 1 of [proposal paper](https://arxiv.org/abs/1904.10079) for more information.  
@@ -288,17 +288,17 @@ Note that GAIL uses less prior knowledge than RL agents, which only uses camera 
 Details of settings are shown in later sections.
 
 Videos of trained agents during their last evaluation round:
-- [Behavioral Cloning trial 1 (reward 5.0)](static/release_bc_gail/BehavioralCloningTreechop1.mp4)
-- [Behavioral Cloning trial 2 (reward 6.0)](static/release_bc_gail/BehavioralCloningTreechop2.mp4)
-- [Behavioral Cloning trial 3 (reward 11.0)](static/release_bc_gail/BehavioralCloningTreechop3.mp4)
-- [GAIL trial 1 (reward 14.0)](static/release_bc_gail/GAILTreechop1.mp4)
-- [GAIL trial 2 (reward 11.0)](static/release_bc_gail/GAILTreechop2.mp4)
-- [GAIL trial 3 (reward 29.0)](static/release_bc_gail/GAILTreechop3.mp4)
+- [Behavioral Cloning trial 1 (reward 17.0)](static/release_bc_gail/BehavioralCloningTreechop1.mp4)
+- [Behavioral Cloning trial 2 (reward 15.0)](static/release_bc_gail/BehavioralCloningTreechop2.mp4)
+- [Behavioral Cloning trial 3 (reward 7.0)](static/release_bc_gail/BehavioralCloningTreechop3.mp4)
+- (NA) GAIL trial 1 (reward 5.0)
+- [GAIL trial 2 (reward 24.0)](static/release_bc_gail/GAILTreechop2.mp4)
+- [GAIL trial 3 (reward 34.0)](static/release_bc_gail/GAILTreechop3.mp4)
 
-![BehavioralCloning trial 3 first 100 frames](static/release_bc_gail/BehavioralCloningTreechop3.gif)  
-Behavioral Cloning trial 3 first 100 frames
+![BehavioralCloning trial 1 first 100 frames](static/release_bc_gail/BehavioralCloningTreechop1.gif)
+Behavioral Cloning trial 1 first 100 frames
 
-![GAIL trial 3 first 100 frames](static/release_bc_gail/GAILTreechop3.gif)  
+![GAIL trial 3 first 100 frames](static/release_bc_gail/GAILTreechop3.gif)
 GAIL trial 3 first 100 frames
 
 
@@ -309,19 +309,17 @@ GAIL trial 3 first 100 frames
 For `MineRLNavigateDense-v0`, both BC and GAIL outperform [original paper](https://arxiv.org/abs/1904.10079)'s BC result 5.57 +- 6.00, and are comparable to other RL agents.
 
 Videos of trained agents during their last evaluation round:
-- [Behavioral Cloning trial 1 (reward 24.4)](static/release_bc_gail/BehavioralCloningNavigateDense1.mp4)
-- [Behavioral Cloning trial 2 (reward 71.3)](static/release_bc_gail/BehavioralCloningNavigateDense2.mp4)
-- [Behavioral Cloning trial 2 (reward 46.1)](static/release_bc_gail/BehavioralCloningNavigateDense3.mp4)
-- [GAIL trial 1 (reward 9.8)](static/release_bc_gail/GAILNavigateDense1.mp4)
-- (NA) GAIL trial 2
-- [GAIL trial 3 (reward 54.2)](static/release_bc_gail/GAILNavigateDense3.mp4)
+- [Behavioral Cloning trial 1 (reward 14.8)](static/release_bc_gail/BehavioralCloningNavigateDense1.mp4)
+- [Behavioral Cloning trial 2 (reward 13.7)](static/release_bc_gail/BehavioralCloningNavigateDense2.mp4)
+- [Behavioral Cloning trial 3 (reward 15.4)](static/release_bc_gail/BehavioralCloningNavigateDense3.mp4)
+- [GAIL trial 1 (reward 1.5)](static/release_bc_gail/GAILNavigateDense1.mp4)
+- [GAIL trial 2 (reward 56.7)](static/release_bc_gail/GAILNavigateDense2.mp4)
+- [GAIL trial 3 (reward 62.8)](static/release_bc_gail/GAILNavigateDense3.mp4)
 
-Notice: Since recording videos of BC during training phases is failed, we alternatively recorded after those phase are finished.
+![Behavioral Cloning trial 3 first 100 frames](static/release_bc_gail/BehavioralCloningNavigateDense3.gif)
+Behavioral Cloning trial 3 first 100 frames
 
-![Behavioral Cloning trial 2 first 100 frames](static/release_bc_gail/BehavioralCloningNavigateDense2.gif)  
-Behavioral Cloning trial 2 first 100 frames
-
-![GAIL trial 3 first 100 frames](static/release_bc_gail/GAILNavigateDense3.gif)  
+![GAIL trial 3 first 100 frames](static/release_bc_gail/GAILNavigateDense3.gif)
 GAIL trial 3 first 100 frames
 
 
@@ -332,18 +330,18 @@ GAIL trial 3 first 100 frames
 BC and GAIL show better performance than RL agents without expert dataset and [original paper](https://arxiv.org/abs/1904.10079)'s BC (4.23 +- 4.15).
 
 Videos of trained agents during their last evaluation round:
-- [Behavioral Cloning trial 1 (reward 0.0)](static/release_bc_gail/BehavioralCloningNavigate1.mp4)
-- [Behavioral Cloning trial 2 (reward 100.0)](static/release_bc_gail/BehavioralCloningNavigate2.mp4)
-- [Behavioral Cloning trial 3 (reward 100.0)](static/release_bc_gail/BehavioralCloningNavigate3.mp4)
+- [Behavioral Cloning trial 1 (reward 100.0)](static/release_bc_gail/BehavioralCloningNavigate1.mp4)
+- [Behavioral Cloning trial 2 (reward 0.0)](static/release_bc_gail/BehavioralCloningNavigate2.mp4)
+- [Behavioral Cloning trial 3 (reward 0.0)](static/release_bc_gail/BehavioralCloningNavigate3.mp4)
 - [GAIL trial 1 (reward 0.0)](static/release_bc_gail/GAILNavigate1.mp4)
 - [GAIL trial 2 (reward 0.0)](static/release_bc_gail/GAILNavigate2.mp4)
-- (NA) GAIL trial 3
+- [GAIL trial 3 (reward 0.0)](static/release_bc_gail/GAILNavigate3.mp4)
 
-![BehavioralCloning trial 2 first 100 frames](static/release_bc_gail/BehavioralCloningNavigate2.gif)  
-Behavioral Cloning trial 2 first 100 frames
+![BehavioralCloning trial 1 first 100 frames](static/release_bc_gail/BehavioralCloningNavigate1.gif)
+Behavioral Cloning trial 1 first 100 frames
 
-![GAIL trial 1 first 100 frames](static/release_bc_gail/GAILNavigate1.gif)  
-GAIL trial 1 first 100 frames
+![GAIL trial 2 first 100 frames](static/release_bc_gail/GAILNavigate2.gif)
+GAIL trial 2 first 100 frames
 
 
 ## MineRLObtainDiamond-v0
