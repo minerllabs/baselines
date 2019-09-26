@@ -172,9 +172,10 @@ def _main(args):
     )
 
     # Draw the computational graph and save it in the output directory.
-    sample_obs = env.observation_space.sample()
-    sample_batch_obs = np.expand_dims(sample_obs, 0)
     q_function = agent.q_function
+    xp = q_function.xp
+    sample_obs = xp.array(env.observation_space.sample().astype(np.float32))
+    sample_batch_obs = xp.expand_dims(sample_obs, 0)
     chainerrl.misc.draw_computational_graph([q_function(sample_batch_obs)], os.path.join(args.outdir, 'model'))
 
     if args.load:
