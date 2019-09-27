@@ -411,3 +411,19 @@ The figure above shows the performance of the algorithms during the training pha
 An additional improvement can be obtained with different amounts of camera actions, so this is something you could try to tune for other environments.
 
 ![release_dqfd_MineRLTreechop-v0_camera_actions](static/release_dqfd/MineRLTreechop-v0_camera_actions_training_results.png)
+
+## MineRLNavigate-v0
+
+In the MineRLNavigate-v0 environment we aslso tried different amounts of camera actions and different amounts of expert demonstrations, but were unable to solve the task.
+
+![release_dqfd_MineRLNavigate-v0_camera_actions](static/release_dqfd/MineRLNavigate-v0_camera_actions_training_results.png)
+
+![release_dqfd_MineRLNavigate-v0_experts](static/release_dqfd/MineRLNavigate-v0_experts_training_results.png)
+
+## MineRLObtainDiamond-v0 and MineRLObtainDiamondDense-v0
+
+DQfD is unable to solve both MineRLObtainDiamond-v0 and MineRLObtainDiamondDense-v0
+
+![release_dqfd_MineRLObtainDiamond-v0](static/release_dqfd/MineRLObtainDiamond-v0_training_results.png)
+
+![release_dqfd_MineRLObtainDiamondDense-v0](static/release_dqfd/MineRLObtainDiamondDense-v0_training_results.png)
