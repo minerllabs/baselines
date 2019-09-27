@@ -2,12 +2,15 @@ from collections import OrderedDict
 import copy
 from logging import getLogger
 import time
+from collections import deque
 
 import gym
 import numpy as np
 import cv2
 from gym.wrappers import Monitor
 from gym.wrappers.monitoring.stats_recorder import StatsRecorder
+
+from chainerrl.wrappers.atari_wrappers import LazyFrames
 
 cv2.ocl.setUseOpenCL(False)
 logger = getLogger(__name__)
@@ -114,6 +117,59 @@ class FrameSkip(gym.Wrapper):
         return obs, total_reward, done, info
 
 
+class FrameStack(gym.Wrapper):
+    def __init__(self, env, k, channel_order='hwc', use_tuple=False):
+        """Stack k last frames.
+
+        Returns lazy array, which is much more memory efficient.
+        """
+        gym.Wrapper.__init__(self, env)
+        self.k = k
+        self.observations = deque([], maxlen=k)
+        self.stack_axis = {'hwc': 2, 'chw': 0}[channel_order]
+        self.use_tuple = use_tuple
+
+        if self.use_tuple:
+            pov_space = env.observation_space[0]
+            inv_space = env.observation_space[1]
+        else:
+            pov_space = env.observation_space
+
+        low_pov = np.repeat(pov_space.low, k, axis=self.stack_axis)
+        high_pov = np.repeat(pov_space.high, k, axis=self.stack_axis)
+        pov_space = gym.spaces.Box(low=low_pov, high=high_pov, dtype=pov_space.dtype)
+
+        if self.use_tuple:
+            low_inv = np.repeat(inv_space.low, k, axis=0)
+            high_inv = np.repeat(inv_space.high, k, axis=0)
+            inv_space = gym.spaces.Box(low=low_inv, high=high_inv, dtype=inv_space.dtype)
+            self.observation_space = gym.spaces.Tuple(
+                (pov_space, inv_space))
+        else:
+            self.observation_space = pov_space
+
+    def reset(self):
+        ob = self.env.reset()
+        for _ in range(self.k):
+            self.observations.append(ob)
+        return self._get_ob()
+
+    def step(self, action):
+        ob, reward, done, info = self.env.step(action)
+        self.observations.append(ob)
+        return self._get_ob(), reward, done, info
+
+    def _get_ob(self):
+        assert len(self.observations) == self.k
+        if self.use_tuple:
+            frames = [x[0] for x in self.observations]
+            inventory = [x[1] for x in self.observations]
+            return (LazyFrames(list(frames), stack_axis=self.stack_axis),
+                    LazyFrames(list(inventory), stack_axis=0))
+        else:
+            return LazyFrames(list(self.observations), stack_axis=self.stack_axis)
+
+
 class ObtainPoVWrapper(gym.ObservationWrapper):
     """Obtain 'pov' value (current game display) of the original observation."""
     def __init__(self, env):
@@ -212,21 +268,90 @@ class UnifiedObservationWrapper(gym.ObservationWrapper):
         return obs
 
 
+class FullObservationSpaceWrapper(gym.ObservationWrapper):
+    """Returns as observation a tuple with the frames and a list of
+    compassAngle and inventory items.
+    compassAngle is scaled to be in the interval [-1, 1] and inventory items
+    are scaled to be in the interval [0, 1]
+    """
+    def __init__(self, env):
+        super().__init__(env)
+
+        pov_space = self.env.observation_space.spaces['pov']
+
+        low_dict = {'pov': pov_space.low, 'inventory': {}}
+        high_dict = {'pov': pov_space.high, 'inventory': {}}
+
+        for obs_name in self.env.observation_space.spaces['inventory'].spaces.keys():
+            obs_space = self.env.observation_space.spaces['inventory'].spaces[obs_name]
+            low_dict['inventory'][obs_name] = obs_space.low
+            high_dict['inventory'][obs_name] = obs_space.high
+
+        if 'compassAngle' in self.env.observation_space.spaces:
+            compass_angle_space = self.env.observation_space.spaces['compassAngle']
+            low_dict['compassAngle'] = compass_angle_space.low
+            high_dict['compassAngle'] = compass_angle_space.high
+
+        low = self.observation(low_dict)
+        high = self.observation(high_dict)
+
+        pov_space = gym.spaces.Box(low=low[0], high=high[0])
+        inventory_space = gym.spaces.Box(low=low[1], high=high[1])
+        self.observation_space = gym.spaces.Tuple((pov_space, inventory_space))
+
+    def observation(self, observation):
+        frame = observation['pov']
+        inventory = []
+
+        if 'compassAngle' in observation:
+            compass_scaled = observation['compassAngle'] / 180
+            inventory.append(compass_scaled)
+
+        for obs_name in observation['inventory'].keys():
+            inventory.append(observation['inventory'][obs_name] / 2304)
+
+        inventory = np.array(inventory)
+        return (frame, inventory)
+
+
 class MoveAxisWrapper(gym.ObservationWrapper):
     """Move axes of observation ndarrays."""
-    def __init__(self, env, source, destination):
-        assert isinstance(env.observation_space, gym.spaces.Box)
+    def __init__(self, env, source, destination, use_tuple=False):
+        if use_tuple:
+            assert isinstance(env.observation_space[0], gym.spaces.Box)
+        else:
+            assert isinstance(env.observation_space, gym.spaces.Box)
         super().__init__(env)
 
         self.source = source
         self.destination = destination
+        self.use_tuple = use_tuple
 
-        low = self.observation(self.observation_space.low)
-        high = self.observation(self.observation_space.high)
-        self.observation_space = gym.spaces.Box(low=low, high=high, dtype=self.observation_space.dtype)
+        if self.use_tuple:
+            low = self.observation(
+                tuple([space.low for space in self.observation_space]))
+            high = self.observation(
+                tuple([space.high for space in self.observation_space]))
+            dtype = self.observation_space[0].dtype
+            pov_space = gym.spaces.Box(low=low[0], high=high[0], dtype=dtype)
+            inventory_space = self.observation_space[1]
+            self.observation_space = gym.spaces.Tuple(
+                (pov_space, inventory_space))
+        else:
+            low = self.observation(self.observation_space.low)
+            high = self.observation(self.observation_space.high)
+            dtype = self.observation_space.dtype
+            self.observation_space = gym.spaces.Box(
+                low=low, high=high, dtype=dtype)
 
-    def observation(self, frame):
-        return np.moveaxis(frame, self.source, self.destination)
+    def observation(self, observation):
+        if self.use_tuple:
+            new_observation = list(observation)
+            new_observation[0] = np.moveaxis(
+                observation[0], self.source, self.destination)
+            return tuple(new_observation)
+        else:
+            return np.moveaxis(observation, self.source, self.destination)
 
 
 class GrayScaleWrapper(gym.ObservationWrapper):
@@ -743,3 +868,120 @@ class MultiDimensionalSoftmaxActionWrapper(gym.ActionWrapper):
                 idx += 1
         logger.debug('discrete action {} -> original action {}'.format(action, original_action))
         return original_action
+
+
+class BranchedRandomizedAction(gym.ActionWrapper):
+    def __init__(self, env, branch_sizes, random_fraction):
+        super().__init__(env)
+        assert 0 <= random_fraction <= 1
+        self._random_fraction = random_fraction
+        self._np_random = np.random.RandomState()
+
+    def action(self, action):
+        if self._np_random.rand() < self._random_fraction:
+            action = [self._np_random.randint(n) for n in self.branch_sizes]
+            action = np.array(action)
+
+        return action
+
+    def seed(self, seed):
+        super().seed(seed)
+        self._np_random.seed(seed)
+
+
+class BranchedActionWrapper(gym.ActionWrapper):
+    def __init__(self, env, branch_sizes, camera_atomic_actions,
+                 max_range_of_camera):
+        super().__init__(env)
+        self.env = env
+        self.branch_sizes = branch_sizes
+        self.camera_atomic_actions = camera_atomic_actions
+        self.max_range_of_camera = max_range_of_camera
+
+    def action(self, action):
+        for i, branch_action in enumerate(action):
+            assert(branch_action >= 0 and branch_action < self.branch_sizes[i])
+
+        action_back_forward = action[0] // 3
+
+        if action_back_forward == 1:
+            action_back = 1
+        else:
+            action_back = 0
+
+        if action_back_forward == 2:
+            action_forward = 1
+        else:
+            action_forward = 0
+
+        action_left_right = action[0] % 3
+
+        if action_left_right == 1:
+            action_left = 1
+        else:
+            action_left = 0
+
+        if action_left_right == 2:
+            action_right = 1
+        else:
+            action_right = 0
+
+        action_jump = (action[1] & 1)
+        action_sprint = (action[1] & 2) // 2
+        action_sneak = (action[1] & 4) // 4
+        action_attack = (action[1] & 8) // 8
+
+        segment_size = 2 * self.max_range_of_camera / (self.camera_atomic_actions - 1)
+        camera0 = action[2] * segment_size
+        camera0 -= self.max_range_of_camera
+        camera1 = action[3] * segment_size
+        camera1 -= self.max_range_of_camera
+
+        #assert abs(camera0) <= self.max_range_of_camera
+        #assert abs(camera1) <= self.max_range_of_camera
+
+        minerl_action = {
+            'back': action_back,
+            'forward': action_forward,
+            'left': action_left,
+            'right': action_right,
+            'jump': action_jump,
+            'sprint': action_sprint,
+            'sneak': action_sneak,
+            'attack': action_attack,
+            'camera': np.array([camera0, camera1]),
+        }
+
+        if 'place' in self.env.action_space:
+            assert(len(action) == 5)
+            num_place_actions = len(self.env.action_space['place'])
+
+            if num_place_actions == 2:  # Navigate envs
+                minerl_action['place'] = action[4]
+            elif num_place_actions == 7:  # Obtain envs
+                craft = 0
+                equip = 0
+                nearbyCraft = 0
+                nearbySmelt = 0
+                place = 0
+
+                if action[4] > 0 and action[4] <= 5:
+                    craft = action[4] - 1
+                elif action[4] <= 13:
+                    equip = action[4] - 6
+                elif action[4] <= 21:
+                    nearbyCraft = action[4] - 14
+                elif action[4] <= 24:
+                    nearbySmelt = action[4] - 22
+                elif action[4] <= 31:
+                    place = action[4] - 25
+
+                minerl_action['craft'] = craft
+                minerl_action['equip'] = equip
+                minerl_action['nearbyCraft'] = nearbyCraft
+                minerl_action['nearbySmelt'] = nearbySmelt
+                minerl_action['place'] = place
+            else:
+                raise Exception("Invalid number of place actions")
+
+        return minerl_action
