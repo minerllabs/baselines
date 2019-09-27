@@ -141,7 +141,7 @@ class FrameStack(gym.Wrapper):
 
         if self.use_tuple:
             low_inv = np.repeat(inv_space.low, k, axis=0)
-            high_inv = np.repeat(inv_space.low, k, axis=0)
+            high_inv = np.repeat(inv_space.high, k, axis=0)
             inv_space = gym.spaces.Box(low=low_inv, high=high_inv, dtype=inv_space.dtype)
             self.observation_space = gym.spaces.Tuple(
                 (pov_space, inv_space))
