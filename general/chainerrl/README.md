@@ -39,7 +39,7 @@ See [MineRL installation](https://github.com/minerllabs/minerl#installation) and
 - [baselines/dqfd.sh]
     - DQfD
 
-# Overview of experimental results of DDDQN/Rainbow/PPO/BC/GAIL
+# Overview of experimental results of DDDQN/Rainbow/PPO/BC/GAIL/DQfD
 
 |                    | Treechop           | Navigate         | NavigateDense      |
 | :---               | ---:               | ---:             | ---:               |
@@ -408,13 +408,13 @@ The exact hyperparameters used for each algorithm can be found from the links in
 
 The figure above shows the performance of the algorithms during the training phase on the MineRLTreechop-v0 task. Each algorithm is trained once, and the shaded area represents the standard deviation over the last 30 episodes.
 
-An additional improvement can be obtained with different amounts of camera actions, so this is something you could try to tune for other environments.
+Similarly to BC/GAIL we use a camera range limitation and convert the continuous range to equally spaced discrete actions. An additional improvement can be obtained with different amounts of camera actions, so this is something you could try to tune for other environments.
 
 ![release_dqfd_MineRLTreechop-v0_camera_actions](static/release_dqfd/MineRLTreechop-v0_camera_actions_training_results.png)
 
 ## MineRLNavigate-v0
 
-In the MineRLNavigate-v0 environment we aslso tried different amounts of camera actions and different amounts of expert demonstrations, but were unable to solve the task.
+In the MineRLNavigate-v0 environment we also tried different amounts of camera actions and different amounts of expert demonstrations, but were unable to solve the task.
 
 ![release_dqfd_MineRLNavigate-v0_camera_actions](static/release_dqfd/MineRLNavigate-v0_camera_actions_training_results.png)
 
