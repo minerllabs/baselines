@@ -427,3 +427,13 @@ DQfD is unable to solve both MineRLObtainDiamond-v0 and MineRLObtainDiamondDense
 ![release_dqfd_MineRLObtainDiamond-v0](static/release_dqfd/MineRLObtainDiamond-v0_training_results.png)
 
 ![release_dqfd_MineRLObtainDiamondDense-v0](static/release_dqfd/MineRLObtainDiamondDense-v0_training_results.png)
+
+## Action Branching architecture
+
+To handle MineRL's large action space we use an [Action Branching architecture](https://arxiv.org/abs/1711.08946) which gives us a way of decomposing the action space, in particular, our architecture has 5 branches at most (depending on the environment it could have less):
+
+- back/forward/left/right
+- attack/sneak/sprint/jump
+- First camera dimension
+- Second camera dimension
+- craft/equip/nearbyCraft/nearbySmelt/place
