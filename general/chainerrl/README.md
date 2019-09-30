@@ -1,8 +1,7 @@
 # MineRL Competition's baseline implementation with ChainerRL
 
 **Note**:  
-For experiments of DDDQN/Rainbow/PPO, we used **MineRL v0.1.18** which is the latest as of July 9, 2019.
-For experiments of BC/GAIL, we used **MineRL v0.2.3**.
+For experiments, we used **MineRL v0.2.3**, which is the latest as of September 30, 2019.
 
 This repository contains a set of baselines implementations to help you get started with the [MineRL](https://github.com/minerllabs/minerl) competition. These implementations were adapted from  [ChainerRL](https://github.com/chainer/chainerrl) and use [Chainer](https://chainer.org/).
 
@@ -51,9 +50,9 @@ See [MineRL installation](https://github.com/minerllabs/minerl#installation) and
 | (paper) A2C        | No                      | 2.61 +- 0.50       | 0.00 +- 0.00     | -0.97 +- 3.32      |
 | (paper) BC         | Yes                     | 0.75 +- 0.39       | 4.23 +- 4.15     | 5.57 +- 6.00       |
 | (paper) PreDQN     | Yes                     | 4.16 +- 0.82       | 6.00 +- 4.65     | **94.96 +- 13.42** |
-| (**ours**) DDDQN   | No                      | 9.68 +- 5.28       | 5.00 +- 21.79    | 57.84 +- 50.74     |
-| (**ours**) Rainbow | No                      | 60.39 +- 19.88     | 9.00 +- 28.62    | 66.48 +- 38.73     |
-| (**ours**) PPO     | No                      | 38.44 +- 19.04     | 6.00 +- 23.75    | 80.84 +- 51.29     |
+| (**ours**) DDDQN   | No                      | 5.28 +- 2.87       | 4.0 +- 19.60     | 59.13 +- 52.43     |
+| (**ours**) Rainbow | No                      | **62.44 +- 2.74**  | 13.0 +- 33.63    | 66.89 +- 41.24     |
+| (**ours**) PPO     | No                      | 56.31 +- 8.31      | 8.0 +- 27.13     | 87.83 +- 59.46     |
 | (**ours**) BC      | Yes                     | 9.27 +- 5.21       | 46.00 +- 50.1    | 69.54 +- 57.02     |
 | (**ours**) GAIL    | Yes                     | 16.34 +- 6.85      | 32.00 +- 46.88   | 59.32 +- 30.60     |
 | (**ours**) DQfD    | Yes                     | **62.37 +- 2.16**  | 6.00 +- 23.75    | not evaluated      |
@@ -62,24 +61,22 @@ See [MineRL installation](https://github.com/minerllabs/minerl#installation) and
 
 Table 1: (for "paper") Results over the best 100 contiguous episodes. +- denotes standard deviation.  
 (for "ours") Results over the best 100 contiguous episodes among three trials (for GAIL in Navigate tasks, two trials instead). +- denotes standard deviation.
-We do not emphasize the best performance for Navigate since the standard deviation is very large.  
+We do not emphasize the best performance for Navigate since the standard deviation is very large, however the performance of BC/GAIL seems to be better.  
 See Table 1 of [proposal paper](https://arxiv.org/abs/1904.10079) for more information.  
 
-For experiments of DDDQN/Rainbow/PPO, we used **MineRL v0.1.18** which is the latest as of July 9, 2019.
-For experiments of BC/GAIL/DQfD, we used **MineRL v0.2.3**.
+For experiments, we used **MineRL v0.2.3**, which is the latest as of September 30, 2019.
 
 
 # Experimental results of DDDQN/Rainbow/PPO
 
 The figures below show the *training* reward graphs for each of DDDQN/Rainbow/PPO with task-specific prior knowledge used to shape the action and observation space.
-For experitments, we used **MineRL v0.1.18** which is the latest as of July 9, 2019.  
 
 The exact hyperparameters used for each algorithm can be found from the links in the "Getting Started" section and their corresponding Python scripts (`baselines/dqn_family.py`, `baselines/ppo.py`).
 
 
 ## MineRLTreechop-v0
 
-![release20190708_MineRLTreechop-v0](static/release20190708/MineRLTreechop-v0.png)
+![release20190926_v23_rainbow_ppo_dddqn/MineRLTreechop-v0](static/release20190926_v23_rainbow_ppo_dddqn/MineRLTreechop-v0.png)
 
 The figure above shows the performance of the algorithms during the training phase on the `MineRLTreechop-v0` task.
 Each algorithm is independently trained 3 times (trials), and the shaded area represents the standard deviation (not the standard error) over the score of the three trials
@@ -92,80 +89,80 @@ Rainbow and PPO outperform DDDQN.
 Note: for a fair comparison, the x-axis does not represent "timestep", but "episode". (because Rainbow and PPO use "frameskip" strategy while DDDQN follows the paper's settings (no frame skipping)).
 
 Videos of trained agents during their last evaluation round:
-- [Rainbow trial 1 (reward 58.0)](static/release20190708/RainbowTreechop1.mp4)
-- [Rainbow trial 2 (reward 79.0)](static/release20190708/RainbowTreechop2.mp4)
-- [Rainbow trial 3 (reward 41.0)](static/release20190708/RainbowTreechop3.mp4)
-- [PPO trial 1 (reward 68.0)](static/release20190708/PPOTreechop1.mp4)
-- [PPO trial 2 (reward 26.0) ](static/release20190708/PPOTreechop2.mp4)
-- [PPO trial 3 (reward 54.0)](static/release20190708/PPOTreechop3.mp4)
-- (NA) DDDQN trial 1
-- [DDDQN trial 2 (reward 0.0?)](static/release20190708/DDDQNTreechop2.mp4)
-- [DDDQN trial 3 (reward 1.0)](static/release20190708/DDDQNTreechop3.mp4)
+- [Rainbow trial 1 (reward 62.0)](static/release20190926_v23_rainbow_ppo_dddqn/RainbowTreechop1.mp4)
+- [Rainbow trial 2 (reward 63.0)](static/release20190926_v23_rainbow_ppo_dddqn/RainbowTreechop2.mp4)
+- [Rainbow trial 3 (reward 63.0)](static/release20190926_v23_rainbow_ppo_dddqn/RainbowTreechop3.mp4)
+- [PPO trial 1 (reward 63.0)](static/release20190926_v23_rainbow_ppo_dddqn/PPOTreechop1.mp4)
+- [PPO trial 2 (reward 46.0) ](static/release20190926_v23_rainbow_ppo_dddqn/PPOTreechop2.mp4)
+- [PPO trial 3 (reward 58.0)](static/release20190926_v23_rainbow_ppo_dddqn/PPOTreechop3.mp4)
+- [DDDQN trial 1 (reward 0.0)](static/release20190926_v23_rainbow_ppo_dddqn/DDDQNTreechop1.mp4)
+- [DDDQN trial 2 (reward 1.0)](static/release20190926_v23_rainbow_ppo_dddqn/DDDQNTreechop2.mp4)
+- [DDDQN trial 3 (reward 0.0)](static/release20190926_v23_rainbow_ppo_dddqn/DDDQNTreechop3.mp4)
 
-![Rainbow trial 2 first 100 frames](static/release20190708/RainbowTreechop2.gif)  
-Rainbow trial 2 first 100 frames
+![Rainbow trial 3 first 100 frames](static/release20190926_v23_rainbow_ppo_dddqn/RainbowTreechop3.gif)  
+Rainbow trial 3 first 100 frames of the last evaluation episode
 
-![PPO trial 1 first 100 frames](static/release20190708/PPOTreechop1.gif)  
-PPO trial 1 first 100 frames
+![PPO trial 2 first 100 frames](static/release20190926_v23_rainbow_ppo_dddqn/PPOTreechop2.gif)  
+PPO trial 2 first 100 frames of the last evaluation episode
 
-![DDDQN trial 3 first 100 frames](static/release20190708/DDDQNTreechop3.gif)  
-DDDQN trial 3 first 100 frames
+![DDDQN trial 2 first 100 frames](static/release20190926_v23_rainbow_ppo_dddqn/DDDQNTreechop2.gif)  
+DDDQN trial 2 first 100 frames of the last evaluation episode
 
 
 ## MineRLNavigateDense-v0
 
-![release20190708_MineRLNavigateDense-v0](static/release20190708/MineRLNavigateDense-v0.png)
+![release20190926_v23_rainbow_ppo_dddqn/MineRLNavigateDense-v0](static/release20190926_v23_rainbow_ppo_dddqn/MineRLNavigateDense-v0.png)
 
 For `MineRLNavigateDense`, DDDQN achieves a score comparable to Rainbow/PPO.
 
 [The MineRL competition's original paper](https://arxiv.org/abs/1904.10079) reports the score of DDDQN (referred as "DQN" in the paper) as 55.59 +- 11.38, which is consistent with our result. (Our result is slightly worse than the original)
 
 Videos of trained agents during their last evaluation round:
-- [Rainbow trial 1 (reward ?)](static/release20190708/RainbowNavigateDense1.mp4)
-- [Rainbow trial 2 (reward 52.6)](static/release20190708/RainbowNavigateDense2.mp4)
-- [Rainbow trial 3 (reward 167.7)](static/release20190708/RainbowNavigateDense3.mp4)
-- [PPO trial 1 (reward 165.9)](static/release20190708/PPONavigateDense1.mp4)
-- [PPO trial 2 (reward 59.6)](static/release20190708/PPONavigateDense2.mp4)
-- [PPO trial 3 (reward 65.1)](static/release20190708/PPONavigateDense3.mp4)
-- [DDDQN trial 1 (reward 161.0)](static/release20190708/DDDQNNavigateDense1.mp4)
-- [DDDQN trial 2 (reward 18.2)](static/release20190708/DDDQNNavigateDense2.mp4)
-- [DDDQN trial 3 (reward 60.3)](static/release20190708/DDDQNNavigateDense3.mp4)
+- [Rainbow trial 1 (reward 6.8)](static/release20190926_v23_rainbow_ppo_dddqn/RainbowNavigateDense1.mp4)
+- [Rainbow trial 2 (reward 67.4)](static/release20190926_v23_rainbow_ppo_dddqn/RainbowNavigateDense2.mp4)
+- [Rainbow trial 3 (reward 33.1)](static/release20190926_v23_rainbow_ppo_dddqn/RainbowNavigateDense3.mp4)
+- [PPO trial 1 (reward 41.6)](static/release20190926_v23_rainbow_ppo_dddqn/PPONavigateDense1.mp4)
+- [PPO trial 2 (reward 56.7)](static/release20190926_v23_rainbow_ppo_dddqn/PPONavigateDense2.mp4)
+- [PPO trial 3 (reward 159.1)](static/release20190926_v23_rainbow_ppo_dddqn/PPONavigateDense3.mp4)
+- [DDDQN trial 1 (reward 42.9)](static/release20190926_v23_rainbow_ppo_dddqn/DDDQNNavigateDense1.mp4)
+- [DDDQN trial 2 (reward 4.0)](static/release20190926_v23_rainbow_ppo_dddqn/DDDQNNavigateDense2.mp4)
+- (NA) DDDQN trial 3
 
-![Rainbow trial 3 first 100 frames](static/release20190708/RainbowNavigateDense3.gif)  
-Rainbow trial 3 first 100 frames
+![Rainbow trial 1 first 100 frames](static/release20190926_v23_rainbow_ppo_dddqn/RainbowNavigateDense1.gif)  
+Rainbow trial 1 first 100 frames of the last evaluation episode
 
-![PPO trial 1 first 100 frames](static/release20190708/PPONavigateDense1.gif)  
-PPO trial 1 first 100 frames
+![PPO trial 3 first 100 frames](static/release20190926_v23_rainbow_ppo_dddqn/PPONavigateDense3.gif)  
+PPO trial 3 first 100 frames of the last evaluation episode
 
-![DDDQN trial 1 first 100 frames](static/release20190708/DDDQNNavigateDense1.gif)  
-DDDQN trial 1 first 100 frames
+![DDDQN trial 2 first 100 frames](static/release20190926_v23_rainbow_ppo_dddqn/DDDQNNavigateDense2.gif)  
+DDDQN trial 2 first 100 frames of the last evaluation episode
 
 
 ## MineRLNavigate-v0
 
-![release20190708_MineRLNavigate-v0](static/release20190708/MineRLNavigate-v0.png)
+![release20190926_v23_rainbow_ppo_dddqn/MineRLNavigate-v0](static/release20190926_v23_rainbow_ppo_dddqn/MineRLNavigate-v0.png)
 
 No algorithm could solve the `MineRLNavigate-v0` (a sparse reward task). Given the difficulties of utilizing RL algorithms for sparse reward tasks, we posit the need for additional methods such as reward shaping, smarter exploration strategies, utilizing expert trajectories, etc.
 
 Videos of trained agents during their last evaluation round:
-- [Rainbow trial 1 (reward 0.0)](static/release20190708/RainbowNavigate1.mp4)
-- [Rainbow trial 2 (reward 0.0)](static/release20190708/RainbowNavigate2.mp4)
-- [Rainbow trial 3 (reward 0.0)](static/release20190708/RainbowNavigate3.mp4)
-- [PPO trial 1 (reward 0.0)](static/release20190708/PPONavigate1.mp4)
-- [PPO trial 2 (reward 0.0)](static/release20190708/PPONavigate2.mp4)
-- [PPO trial 3 (reward 0.0)](static/release20190708/PPONavigate3.mp4)
-- [DDDQN trial 1 (reward 0.0)](static/release20190708/DDDQNNavigate1.mp4)
-- (NA) DDDQN trial 2
-- [DDDQN trial 3 (reward 0.0)](static/release20190708/DDDQNNavigate3.mp4)
+- [Rainbow trial 1 (reward 0.0)](static/release20190926_v23_rainbow_ppo_dddqn/RainbowNavigate1.mp4)
+- [Rainbow trial 2 (reward ?)](static/release20190926_v23_rainbow_ppo_dddqn/RainbowNavigate2.mp4)
+- [Rainbow trial 3 (reward 0.0)](static/release20190926_v23_rainbow_ppo_dddqn/RainbowNavigate3.mp4)
+- [PPO trial 1 (reward 0.0)](static/release20190926_v23_rainbow_ppo_dddqn/PPONavigate1.mp4)
+- [PPO trial 2 (reward 0.0)](static/release20190926_v23_rainbow_ppo_dddqn/PPONavigate2.mp4)
+- [PPO trial 3 (reward 100.0)](static/release20190926_v23_rainbow_ppo_dddqn/PPONavigate3.mp4)
+- [DDDQN trial 1 (reward ?)](static/release20190926_v23_rainbow_ppo_dddqn/DDDQNNavigate1.mp4)
+- [DDDQN trial 2 (reward 0.0)](static/release20190926_v23_rainbow_ppo_dddqn/DDDQNNavigate2.mp4)
+- [DDDQN trial 3 (reward ?)](static/release20190926_v23_rainbow_ppo_dddqn/DDDQNNavigate3.mp4)
 
-![Rainbow trial 1 first 100 frames](static/release20190708/RainbowNavigate1.gif)  
-Rainbow trial 1 first 100 frames
+![Rainbow trial 3 first 100 frames](static/release20190926_v23_rainbow_ppo_dddqn/RainbowNavigate3.gif)  
+Rainbow trial 3 first 100 frames of the last evaluation episode
 
-![PPO trial 1 first 100 frames](static/release20190708/PPONavigate1.gif)  
-PPO trial 1 first 100 frames
+![PPO trial 3 first 100 frames](static/release20190926_v23_rainbow_ppo_dddqn/PPONavigate3.gif)  
+PPO trial 3 first 100 frames of the last evaluation episode
 
-![DDDQN trial 1 first 100 frames](static/release20190708/DDDQNNavigate1.gif)  
-DDDQN trial 1 first 100 frames
+![DDDQN trial 2 first 100 frames](static/release20190926_v23_rainbow_ppo_dddqn/DDDQNNavigate2.gif)  
+DDDQN trial 2 first 100 frames of the last evaluation episode
 
 
 ## MineRLObtainDiamond-v0
@@ -298,10 +295,10 @@ Videos of trained agents during their last evaluation round:
 - [GAIL trial 3 (reward 34.0)](static/release_bc_gail/GAILTreechop3.mp4)
 
 ![BehavioralCloning trial 1 first 100 frames](static/release_bc_gail/BehavioralCloningTreechop1.gif)
-Behavioral Cloning trial 1 first 100 frames
+Behavioral Cloning trial 1 first 100 frames of the last evaluation episode
 
 ![GAIL trial 3 first 100 frames](static/release_bc_gail/GAILTreechop3.gif)
-GAIL trial 3 first 100 frames
+GAIL trial 3 first 100 frames of the last evaluation episode
 
 
 ## MineRLNavigateDense-v0
@@ -319,10 +316,10 @@ Videos of trained agents during their last evaluation round:
 - [GAIL trial 3 (reward 62.8)](static/release_bc_gail/GAILNavigateDense3.mp4)
 
 ![Behavioral Cloning trial 3 first 100 frames](static/release_bc_gail/BehavioralCloningNavigateDense3.gif)
-Behavioral Cloning trial 3 first 100 frames
+Behavioral Cloning trial 3 first 100 frames of the last evaluation episode
 
 ![GAIL trial 3 first 100 frames](static/release_bc_gail/GAILNavigateDense3.gif)
-GAIL trial 3 first 100 frames
+GAIL trial 3 first 100 frames of the last evaluation episode
 
 
 ## MineRLNavigate-v0
@@ -340,10 +337,10 @@ Videos of trained agents during their last evaluation round:
 - [GAIL trial 3 (reward 0.0)](static/release_bc_gail/GAILNavigate3.mp4)
 
 ![BehavioralCloning trial 1 first 100 frames](static/release_bc_gail/BehavioralCloningNavigate1.gif)
-Behavioral Cloning trial 1 first 100 frames
+Behavioral Cloning trial 1 first 100 frames of the last evaluation episode
 
 ![GAIL trial 2 first 100 frames](static/release_bc_gail/GAILNavigate2.gif)
-GAIL trial 2 first 100 frames
+GAIL trial 2 first 100 frames of the last evaluation episode
 
 
 ## MineRLObtainDiamond-v0
