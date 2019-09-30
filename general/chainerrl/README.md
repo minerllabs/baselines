@@ -1,7 +1,7 @@
 # MineRL Competition's baseline implementation with ChainerRL
 
 **Note**:  
-For experiments, we used **MineRL v0.2.3**, which is the latest as of September 26, 2019.
+For experiments, we used **MineRL v0.2.3**, which is the latest as of September 30, 2019.
 
 This repository contains a set of baselines implementations to help you get started with the [MineRL](https://github.com/minerllabs/minerl) competition. These implementations were adapted from  [ChainerRL](https://github.com/chainer/chainerrl) and use [Chainer](https://chainer.org/).
 
