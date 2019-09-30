@@ -28,7 +28,7 @@ See [MineRL installation](https://github.com/minerllabs/minerl#installation) and
 # Getting started
 
 ### Dataset download
-- In order to run the Behavoral Cloning and GAIL agents, you need to download expert dataset into an appropriate location (by default, `baselines/expert_dataset`).
+- In order to run the Behavoral Cloning, GAIL and DQfD agents, you need to download expert dataset into an appropriate location (by default, `baselines/expert_dataset`).
 ### Training
 - [baselines/dddqn.sh]
     - Double Dueling DQN (DDDQN), with implementation and hyperparameters as described in the [proposal paper](https://arxiv.org/abs/1904.10079) (code: [here](https://github.com/minerllabs/minerl/blob/master/tests/excluded/navigate_dqn_test.py) and [here](https://github.com/minerllabs/minerl/blob/master/tests/excluded/treechop_dqn_test.py)).
@@ -40,9 +40,10 @@ See [MineRL installation](https://github.com/minerllabs/minerl#installation) and
     - Behavoral Cloning (BC)
 - [baselines/gail.sh]
     - GAIL
+- [baselines/dqfd.sh]
+    - DQfD
 
-
-# Overview of experimental results of DDDQN/Rainbow/PPO/BC/GAIL
+# Overview of experimental results of DDDQN/Rainbow/PPO/BC/GAIL/DQfD
 
 |                    | use trajectory dataset? | Treechop           | Navigate         | NavigateDense      |
 | :---               | :---                    | ---:               | ---:             | ---:               |
@@ -55,6 +56,7 @@ See [MineRL installation](https://github.com/minerllabs/minerl#installation) and
 | (**ours**) PPO     | No                      | 38.44 +- 19.04     | 6.00 +- 23.75    | 80.84 +- 51.29     |
 | (**ours**) BC      | Yes                     | 9.27 +- 5.21       | 46.00 +- 50.1    | 69.54 +- 57.02     |
 | (**ours**) GAIL    | Yes                     | 16.34 +- 6.85      | 32.00 +- 46.88   | 59.32 +- 30.60     |
+| (**ours**) DQfD    | Yes                     | **62.37 +- 2.16**  | 6.00 +- 23.75    | not evaluated      |
 | (paper) Human      | -                       | 64.00 +- 0.00      | 100.00 +- 0.00   | 164.00 +- 0.00     |
 | (paper) Random     | -                       | 3.81 +- 0.57       | 1.00 +- 1.95     | -4.37 +- 5.10      |
 
@@ -64,7 +66,7 @@ We do not emphasize the best performance for Navigate since the standard deviati
 See Table 1 of [proposal paper](https://arxiv.org/abs/1904.10079) for more information.  
 
 For experiments of DDDQN/Rainbow/PPO, we used **MineRL v0.1.18** which is the latest as of July 9, 2019.
-For experiments of BC/GAIL, we used **MineRL v0.2.3**.
+For experiments of BC/GAIL/DQfD, we used **MineRL v0.2.3**.
 
 
 # Experimental results of DDDQN/Rainbow/PPO
@@ -397,3 +399,45 @@ Ties are broken by the order of `--prioritized-elements`.
 #### Pitch control
 
 In BC, pitch control is disabled by default. This parameter can be modified by the `--allow-pitch` option.
+
+# Experimental results of DQfD
+
+The figures below show the *training* reward graphs for each of DQfD with task-specific prior knowledge used to shape the action and observation space.
+
+The exact hyperparameters used for each algorithm can be found from the links in the "Getting Started" section and their corresponding Python scripts (`baselines/train_dqfd.py`).
+
+## MineRLTreechop-v0
+
+![release_dqfd_MineRLTreechop-v0](static/release_dqfd/MineRLTreechop-v0_training_results.png)
+
+The figure above shows the performance of the algorithms during the training phase on the MineRLTreechop-v0 task. Each algorithm is trained once, and the shaded area represents the standard deviation over the last 30 episodes.
+
+Similarly to BC/GAIL we use a camera range limitation and convert the continuous range to equally spaced discrete actions. An additional improvement can be obtained with different amounts of camera actions, so this is something you could try to tune for other environments.
+
+![release_dqfd_MineRLTreechop-v0_camera_actions](static/release_dqfd/MineRLTreechop-v0_camera_actions_training_results.png)
+
+## MineRLNavigate-v0
+
+In the MineRLNavigate-v0 environment we also tried different amounts of camera actions and different amounts of expert demonstrations, but were unable to solve the task.
+
+![release_dqfd_MineRLNavigate-v0_camera_actions](static/release_dqfd/MineRLNavigate-v0_camera_actions_training_results.png)
+
+![release_dqfd_MineRLNavigate-v0_experts](static/release_dqfd/MineRLNavigate-v0_experts_training_results.png)
+
+## MineRLObtainDiamond-v0 and MineRLObtainDiamondDense-v0
+
+DQfD is unable to solve both MineRLObtainDiamond-v0 and MineRLObtainDiamondDense-v0
+
+![release_dqfd_MineRLObtainDiamond-v0](static/release_dqfd/MineRLObtainDiamond-v0_training_results.png)
+
+![release_dqfd_MineRLObtainDiamondDense-v0](static/release_dqfd/MineRLObtainDiamondDense-v0_training_results.png)
+
+## Action Branching architecture
+
+To handle MineRL's large action space we use an [Action Branching architecture](https://arxiv.org/abs/1711.08946) which gives us a way of decomposing the action space, in particular, our architecture has 5 branches at most (depending on the environment it could have less):
+
+- back/forward/left/right
+- attack/sneak/sprint/jump
+- First camera dimension
+- Second camera dimension
+- craft/equip/nearbyCraft/nearbySmelt/place
