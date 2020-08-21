@@ -18,16 +18,17 @@ This repository contains baselines for various environments in the [`minerl` pyt
 All baselines for the current 2020 competition have been provided by Preferred Networks
 
 
-## Using the Baselines
-Each baseline is a submitable repository! Simply clone one of the following repositories:
+## 2020 PfN Baselines
 
 #### [SQIL](https://github.com/s-shiroshita/minerl2020_sqil_submission)
 #### [Rainbow](https://github.com/keisuke-nakata/minerl2020_submission)
 #### [DQFD](https://github.com/marioyc/minerl2020_dqfd_submission)
 #### [PDDDQN](https://github.com/ummavi/minerl2020_submission)
 
+## How to use these baselines
+Each baseline is a complete submitable repository!
 
-To get started, do the following:
+To get started, simply do the following:
 1.  Install the `minerl` python package: http://www.minerl.io/docs/tutorials/index.html
     - [Install JDK 8](http://www.minerl.io/docs/tutorials/index.html)
     - Install the MineRL Pacakge
