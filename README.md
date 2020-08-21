@@ -13,22 +13,19 @@
 [![Discord](https://img.shields.io/discord/565639094860775436.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/BT9uegr)
 
 
-This repository contains baselines for various environments in the [`minerl` python package](https://github.com/minerllabs/minerl) as well as baseline submissions for the [MineRL Competition on Sample Efficicent RL @ NeurIPS 2019](https://www.aicrowd.com/organizers/minerl/challenges/neurips-2019-minerl-competition/). 
+This repository contains baselines for various environments in the [`minerl` python package](https://github.com/minerllabs/minerl) as well as baseline submissions for the [MineRL Competition on Sample Efficicent RL @ NeurIPS 2020](https://www.aicrowd.com/challenges/neurips-2020-minerl-competition). 
+
+All baselines for the current 2020 competition have been provided by Preferred Networks
 
 
 ## Using the Baselines
-The repository is broken up into two main folders:
-```
-competition/ # Baseline submissions for NeurIPS comp (MineRLObtainDiamond-v0)
-   random_agent/ # git submodule, forks minerllabs/aicrowd_submission_template
-   dqn_baseline/ # git submodule, forks ^^
-   [...]
+Each baseline is a submitable repository! Simply clone one of the following repositories:
 
-general/ # General baselines for the 6+ `minerl` environments!
-   chainerrl/ # Baselines written in the Chainer RL framework
-   [...]
+#### [SQIL](https://github.com/s-shiroshita/minerl2020_sqil_submission)
+#### [Rainbow](https://github.com/keisuke-nakata/minerl2020_submission)
+#### [DQFD](https://github.com/marioyc/minerl2020_dqfd_submission)
+#### [PDDDQN](https://github.com/ummavi/minerl2020_submission)
 
-```
 
 To get started, do the following:
 1.  Install the `minerl` python package: http://www.minerl.io/docs/tutorials/index.html
@@ -37,11 +34,11 @@ To get started, do the following:
         ```
         pip3 install --upgrade minerl
         ``` 
-2. Clone the baselines **recursively**:
+2. Clone the one of the baseline repositories:
     ```
-    git clone https://github.com/minerllabs/baselines.git --recurse-submodules 
+    git clone https://github.com/s-shiroshita/minerl2020_sqil_submission.git
     ```
-3. Check out the baselines in [competition/](competition/) and [general/](general/)!
+3. Modify the baselines with your ideas!
 
 That's all! :) 
 
