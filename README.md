@@ -26,7 +26,7 @@ Coming soon.
 The 2021 Diamond competition has two tracks - Intro and Research. The Intro track acts as a stepping stone towards the main Research track. The baselines for both tracks can be found below:   
 
 * [**2021 Diamond Intro Track Baselines**](https://github.com/KarolisRam/MineRL2021-Intro-baselines)  
-* **2021 Diamond Research Track Baselines (coming soon)**
+* [**2021 Diamond Research Track Baselines**](https://github.com/KarolisRam/MineRL2021-Research-baselines)  
 
 ## Resources
 
