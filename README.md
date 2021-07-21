@@ -20,7 +20,7 @@ This repository contains baselines for the two NeurIPS 2021 competitions based o
 
 ## 2021 BASALT Baselines
 
-Coming soon.
+* [**2021 BASALT Baselines**](https://github.com/minerllabs/basalt_competition_baseline_submissions)
 
 ## 2021 Diamond Baselines
 The 2021 Diamond competition has two tracks - Intro and Research. The Intro track acts as a stepping stone towards the main Research track. The baselines for both tracks can be found below:   
